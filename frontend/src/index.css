@@ -1,0 +1,68 @@
+@import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-status-label: #94a3b8;
+  --color-status-transit: #3b82f6;
+  --color-status-ofd: #f59e0b;
+  --color-status-delivered: #10b981;
+  --color-status-exception: #ef4444;
+  --color-status-returned: #a855f7;
+  --color-status-unknown: #64748b;
+}
+
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --panel-2: #f1f3f6;
+  --border: #e3e6ea;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #0f766e;
+  --accent-fg: #ffffff;
+  --ring: #14b8a6;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0b1017;
+  --panel: #111823;
+  --panel-2: #172030;
+  --border: #243040;
+  --text: #e5eaf1;
+  --muted: #8b98ab;
+  --accent: #2dd4bf;
+  --accent-fg: #062b27;
+  --ring: #2dd4bf;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-ring: var(--ring);
+}
+
+html, body, #root { height: 100%; }
+body { @apply bg-bg text-text font-sans antialiased text-[14px]; margin: 0; }
+* { border-color: var(--border); }
+
+.maplibregl-popup-content { @apply bg-panel text-text rounded-lg shadow-lg border border-border p-3; }
+.maplibregl-popup-tip { border-top-color: var(--panel) !important; border-bottom-color: var(--panel) !important; }
+.maplibregl-ctrl-group { @apply bg-panel border border-border; }
+.maplibregl-ctrl-group button { @apply text-text; }
+.dark .maplibregl-ctrl-group button span { filter: invert(1); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }

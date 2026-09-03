@@ -1,0 +1,24 @@
+# runtime data (private!)
+data/
+*.db
+*.db-wal
+*.db-shm
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# node
+node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+
+# misc
+.DS_Store
+screenshots/
