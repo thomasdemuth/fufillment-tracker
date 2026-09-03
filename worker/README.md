@@ -6,6 +6,8 @@ Cloudflare's free plan is more than enough.
 
 Full walkthrough with screenshots-in-words, including the no-terminal route: [`docs/LIVE-TRACKING.md`](../docs/LIVE-TRACKING.md).
 
+No terminal? Add the keys as repository secrets and run the **deploy-relay** GitHub Action (route C in the guide).
+
 Quick version (terminal):
 
 ```bash

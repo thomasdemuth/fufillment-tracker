@@ -41,7 +41,7 @@ The whole setup takes about 20 minutes plus whatever time the carriers take to a
 
 ## 3. Deploy the relay on Cloudflare
 
-You need a free Cloudflare account: <https://dash.cloudflare.com/sign-up>. Pick one of the two routes.
+You need a free Cloudflare account: <https://dash.cloudflare.com/sign-up>. Pick one of the three routes; C is the least typing.
 
 ### Route A: in the dashboard, no terminal
 
@@ -87,6 +87,30 @@ npx wrangler secret put FEDEX_SECRET_KEY
 
 Sandbox flags and allowed origins are plain variables in [`worker/wrangler.toml`](../worker/wrangler.toml); edit and
 run `npx wrangler deploy` again.
+
+### Route C: let GitHub deploy it for you (no terminal, no dashboard code editing)
+
+The repository has a workflow that deploys the Worker and sets its secrets from the repository's secrets.
+
+1. Create a Cloudflare API token: <https://dash.cloudflare.com/profile/api-tokens> → **Create Token** → use the
+   **Edit Cloudflare Workers** template → Continue → Create Token. Copy it.
+2. Find your **Account ID**: open **Workers & Pages** in the dashboard; it is on the right-hand side of the overview.
+3. In the GitHub repository open **Settings → Secrets and variables → Actions → New repository secret** and add:
+
+   | Secret | Value |
+   |---|---|
+   | `CLOUDFLARE_API_TOKEN` | the token from step 1 |
+   | `CLOUDFLARE_ACCOUNT_ID` | the account ID from step 2 |
+   | `RELAY_TOKEN` | a password you make up; the site asks for it |
+   | `USPS_CLIENT_ID`, `USPS_CLIENT_SECRET` | from section 1 (skip if you only use FedEx) |
+   | `FEDEX_API_KEY`, `FEDEX_SECRET_KEY` | from section 2 (skip if you only use USPS) |
+
+4. Open the **Actions** tab → **deploy-relay** → **Run workflow**. Tick "USPS test environment" while your USPS
+   production access is pending. When the run finishes, its summary shows the Worker address.
+5. Re-run the workflow whenever you add or change a secret (for example when USPS production access arrives:
+   run it again with the test-environment box unticked).
+
+The secrets stay in GitHub's encrypted secret store and Cloudflare; they are never written to the repository.
 
 ## 4. Connect the site to the relay
 
