@@ -12,6 +12,7 @@ const PURPOSE: Record<string, string> = {
   carrier_fedex: 'FedEx tracking API',
   geocoder: 'Street-level geocoding (opt-in)',
   tiles: 'Map tiles',
+  relay: 'Your tracking relay (USPS/FedEx lookups)',
 }
 
 export function PrivacyPage() {
@@ -120,7 +121,7 @@ export function PrivacyPage() {
               <span className="text-[11px] text-muted">hosts only, never payloads</span>
             </CardHeader>
             <CardBody className="text-sm">
-              {s?.egress.length === 0 && <div className="text-xs text-muted">{isLocal() ? 'This browser makes no data requests: carriers are mocked and geocoding is offline. Only map tiles are fetched.' : 'No outbound requests have been made by the server yet.'}</div>}
+              {s?.egress.length === 0 && <div className="text-xs text-muted">{isLocal() ? 'This browser sends nothing but map-tile requests: carriers are mocked and geocoding is offline. With a tracking relay configured, tracking numbers go to your own relay Worker.' : 'No outbound requests have been made by the server yet.'}</div>}
               {s && s.egress.length > 0 && (
                 <table className="w-full text-xs">
                   <thead className="text-left text-muted">

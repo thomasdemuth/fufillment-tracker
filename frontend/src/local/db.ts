@@ -92,12 +92,25 @@ export interface LocalJob extends JobOut {
   cancel_requested: boolean
 }
 
+export interface RelayCheck {
+  at: string
+  ok: boolean
+  message: string
+  carriers: Record<'usps' | 'fedex', { configured: boolean; sandbox: boolean; ok?: boolean; message?: string }>
+}
+
 export interface LocalSettings {
   stuck_days: number
   origin_postal_code: string | null
   map_style_url: string | null
   map_style_url_dark: string | null
+  /** Live tracking relay (worker/): URL of the user's Cloudflare Worker and its token. */
+  relay_url: string | null
+  relay_token: string | null
+  relay_check: RelayCheck | null
 }
+
+export const DEFAULT_SETTINGS: LocalSettings = { stuck_days: 7, origin_postal_code: null, map_style_url: null, map_style_url_dark: null, relay_url: null, relay_token: null, relay_check: null }
 
 export interface LocalData {
   format: 'fulfillment-tracker-local'
@@ -130,7 +143,7 @@ export function emptyData(): LocalData {
     tags: [],
     presets: [],
     jobs: [],
-    settings: { stuck_days: 7, origin_postal_code: null, map_style_url: null, map_style_url_dark: null },
+    settings: { ...DEFAULT_SETTINGS },
     seq: {},
   }
 }
@@ -196,6 +209,7 @@ export class LocalDb {
       data = null
     }
     if (!data || data.format !== 'fulfillment-tracker-local') data = emptyData()
+    data.settings = { ...DEFAULT_SETTINGS, ...(data.settings ?? {}) } // fields added by newer versions
     return new LocalDb(data)
   }
 

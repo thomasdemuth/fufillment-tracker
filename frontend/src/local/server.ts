@@ -10,7 +10,8 @@ import { DEFAULT_MAP_STYLE, DEFAULT_MAP_STYLE_DARK, LocalDb, nowIso, type LocalJ
 import { geocodeOffline, loadZipIndex } from '@/local/geocode'
 import { importRows } from '@/local/importer'
 import { ALL_FIELDS, FIELD_LABELS, FIELD_SYNONYMS, headerSignature, suggestMapping } from '@/local/mapping'
-import { mockTrack } from '@/local/mockCarrier'
+import { mockTrack, type TrackError, type TrackResult } from '@/local/mockCarrier'
+import { normalizeRelayUrl, relayTrack, testRelay, type LiveResult, type RelayConfig } from '@/local/liveCarriers'
 import { normalizeTracking } from '@/local/normalize'
 import { detectHeaderRow, readWorkbook, sheetOf, tableFromRows, type Workbook } from '@/local/spreadsheet'
 import { applyError, applyResult, attentionReasons } from '@/local/tracking'
@@ -286,13 +287,33 @@ function mockContext(ships: LocalShipment[]) {
   }
 }
 
-async function refreshOne(db: LocalDb, s: LocalShipment): Promise<{ changed: boolean; error: string | null }> {
-  if (s.carrier !== 'usps' && s.carrier !== 'fedex') return { changed: false, error: 'No carrier assigned; set the carrier first.' }
+function relayConfig(db: LocalDb): RelayConfig | null {
+  const s = db.data.settings
+  return s.relay_url && s.relay_token ? { url: s.relay_url, token: s.relay_token } : null
+}
+
+type LiveCarrier = 'usps' | 'fedex'
+
+/** Results for a group of shipments of one carrier: the relay (live) when configured, else the mock. */
+async function trackGroup(db: LocalDb, carrier: LiveCarrier, ships: LocalShipment[]): Promise<Record<string, LiveResult>> {
+  const numbers = ships.map((s) => s.tracking_number)
+  const relay = relayConfig(db)
+  if (relay) return relayTrack(relay, carrier, numbers)
+  const ctx = mockContext(ships)
+  return Object.fromEntries(numbers.map((n) => [n, mockTrack(n, carrier, ctx)]))
+}
+
+function asError(r: LiveResult): TrackError {
+  return r as TrackError
+}
+
+async function refreshOne(db: LocalDb, s: LocalShipment): Promise<{ changed: boolean; error: string | null; kind: string | null }> {
+  if (s.carrier !== 'usps' && s.carrier !== 'fedex') return { changed: false, error: 'No carrier assigned; set the carrier first.', kind: 'disabled' }
   await loadZipIndex().catch(() => undefined)
-  const res = mockTrack(s.tracking_number, s.carrier, mockContext([s]))
-  if (res.ok) return { changed: applyResult(s, res, () => db.nextId('event')), error: null }
-  applyError(s, res)
-  return { changed: false, error: res.message }
+  const res = (await trackGroup(db, s.carrier, [s]))[s.tracking_number]
+  if (res.ok) return { changed: applyResult(s, res as TrackResult, () => db.nextId('event')), error: null, kind: null }
+  applyError(s, asError(res))
+  return { changed: false, error: res.message, kind: res.kind }
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -304,29 +325,34 @@ async function runJob(db: LocalDb, job: LocalJob): Promise<void> {
   try {
     await loadZipIndex().catch(() => undefined)
     const ships = job.ids.map((id) => db.shipment(id)).filter((s): s is LocalShipment => !!s)
-    const ctx = mockContext(ships)
     const samples: string[] = []
-    const chunk = 25
-    for (let i = 0; i < ships.length; i += chunk) {
-      if (job.cancel_requested) {
-        job.status = 'cancelled'
-        break
-      }
-      for (const s of ships.slice(i, i + chunk)) {
-        if (s.carrier !== 'usps' && s.carrier !== 'fedex') continue
-        const res = mockTrack(s.tracking_number, s.carrier, ctx)
-        if (res.ok) {
-          if (applyResult(s, res, () => db.nextId('event'))) job.updated++
-        } else {
-          applyError(s, res)
-          job.errors++
-          if (samples.length < 10) samples.push(`${s.tracking_number}: ${res.message}`)
+    const live = !!relayConfig(db)
+    const chunk = live ? 40 : 25
+    for (const carrier of ['usps', 'fedex'] as const) {
+      const group = ships.filter((s) => s.carrier === carrier)
+      for (let i = 0; i < group.length; i += chunk) {
+        if (job.cancel_requested) {
+          job.status = 'cancelled'
+          break
         }
-        job.done++
+        const part = group.slice(i, i + chunk)
+        const results = await trackGroup(db, carrier, part)
+        for (const s of part) {
+          const res = results[s.tracking_number]
+          if (res?.ok) {
+            if (applyResult(s, res as TrackResult, () => db.nextId('event'))) job.updated++
+          } else {
+            applyError(s, res ? asError(res) : { ok: false, tracking_number: s.tracking_number, kind: 'transient', message: 'No result' })
+            job.errors++
+            if (samples.length < 10) samples.push(`${s.tracking_number}: ${res?.message ?? 'no result'}`)
+          }
+          job.done++
+        }
+        job.error_samples = samples
+        db.touch()
+        await sleep(live ? 0 : 40) // let the UI poll and show progress
       }
-      job.error_samples = samples
-      db.touch()
-      await sleep(40) // let the UI poll and show progress
+      if (job.status !== 'running') break
     }
     if (job.status === 'running') job.status = 'done'
   } catch (e) {
@@ -479,24 +505,50 @@ function generalSettings(db: LocalDb) {
   return { stuck_days: s.stuck_days, origin_postal_code: s.origin_postal_code, map_style_url: s.map_style_url, map_style_url_dark: s.map_style_url_dark, public_url: null, hosted_ui_url: null }
 }
 
-function carrierSettings() {
-  return ['usps', 'fedex'].map((carrier) => ({
-    carrier,
-    enabled: true,
-    mode: 'mock',
-    sandbox: false,
-    client_id: null,
-    client_secret_masked: null,
-    has_secret: false,
-    from_env: false,
-    status: 'mock',
-    last_check_at: null,
-    last_check_ok: null,
-    last_check_message: null,
-  }))
+function carrierSettings(db: LocalDb) {
+  const relay = relayConfig(db)
+  const check = db.data.settings.relay_check
+  return (['usps', 'fedex'] as const).map((carrier) => {
+    const c = check?.carriers[carrier]
+    const status = !relay ? 'mock' : !c ? 'unconfigured' : !c.configured ? 'unconfigured' : c.ok === false ? 'error' : 'ok'
+    return {
+      carrier,
+      enabled: true,
+      mode: relay ? 'live' : 'mock',
+      sandbox: !!c?.sandbox,
+      client_id: null,
+      client_secret_masked: null,
+      has_secret: !!c?.configured,
+      from_env: false,
+      status,
+      last_check_at: check?.at ?? null,
+      last_check_ok: c?.ok ?? null,
+      last_check_message: c?.message ?? null,
+    }
+  })
 }
 
-const NEEDS_APP = 'Live carrier tracking needs the app running on your own computer (see the README). In this browser, carriers stay in mock mode.'
+function relaySettings(db: LocalDb) {
+  const s = db.data.settings
+  return { relay_url: s.relay_url, has_token: !!s.relay_token, token_masked: s.relay_token ? `${'•'.repeat(6)}${s.relay_token.slice(-2)}` : null, relay_check: s.relay_check }
+}
+
+async function runRelayTest(db: LocalDb): Promise<Response> {
+  const relay = relayConfig(db)
+  if (!relay) return json({ detail: 'Enter the relay address and token first.' }, 400)
+  try {
+    const r = await testRelay(relay)
+    db.data.settings.relay_check = { at: nowIso(), ...r }
+    db.touch()
+    return json(db.data.settings.relay_check)
+  } catch (e) {
+    db.data.settings.relay_check = { at: nowIso(), ok: false, message: (e as Error).message, carriers: { usps: { configured: false, sandbox: false }, fedex: { configured: false, sandbox: false } } }
+    db.touch()
+    return json({ detail: (e as Error).message }, 400)
+  }
+}
+
+const NEEDS_RELAY = 'In this browser, carrier credentials live on your tracking relay Worker, not here: set them with `wrangler secret put` (see docs/LIVE-TRACKING.md) and point Settings → Carriers at the relay.'
 
 function privacySummary(db: LocalDb) {
   const d = db.data
@@ -515,14 +567,17 @@ function privacySummary(db: LocalDb) {
     uploads: d.uploads.length,
     events: d.shipments.reduce((n, s) => n + s.events.length, 0),
     secrets: [
-      { name: 'USPS credentials', where: 'not needed (mock carrier)' },
-      { name: 'FedEx credentials', where: 'not needed (mock carrier)' },
+      { name: 'USPS credentials', where: relayConfig(db) ? 'on your relay Worker (Cloudflare secrets)' : 'not set (mock carrier)' },
+      { name: 'FedEx credentials', where: relayConfig(db) ? 'on your relay Worker (Cloudflare secrets)' : 'not set (mock carrier)' },
+      { name: 'Relay token', where: d.settings.relay_token ? 'this browser (IndexedDB)' : 'not set' },
       { name: 'Geocoder API key', where: 'not needed (offline ZIP table)' },
     ],
     tile_host: tileHost,
     geocoder: 'offline ZIP table (in this browser)',
     auth_enabled: false,
-    egress: [],
+    egress: d.settings.relay_url && d.settings.relay_check
+      ? [{ host: new URL(d.settings.relay_url).host, purpose: 'relay', data_classes: 'tracking_number', count: 0, last_at: d.settings.relay_check.at }]
+      : [],
     wipe_token: WIPE_TOKEN,
   }
 }
@@ -532,11 +587,12 @@ function privacySummary(db: LocalDb) {
 async function handle(db: LocalDb, method: string, path: string, q: URLSearchParams, input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   let m: RegExpExecArray | null
 
+  const carrierMode = relayConfig(db) ? 'live' : 'mock'
   if (path === '/api/config') {
     const s = db.data.settings
-    return json({ app_name: APP_NAME, map_style_url: s.map_style_url || DEFAULT_MAP_STYLE, map_style_url_dark: s.map_style_url_dark || DEFAULT_MAP_STYLE_DARK, carrier_mode: 'mock', auth_enabled: false, stuck_days: s.stuck_days })
+    return json({ app_name: APP_NAME, map_style_url: s.map_style_url || DEFAULT_MAP_STYLE, map_style_url_dark: s.map_style_url_dark || DEFAULT_MAP_STYLE_DARK, carrier_mode: carrierMode, auth_enabled: false, stuck_days: s.stuck_days })
   }
-  if (path === '/api/health') return json({ ok: true, db: 'browser', carrier_mode: 'mock', auth: false, refresh_running: db.data.jobs.some((j) => j.status === 'running'), carriers: { usps: 'mock', fedex: 'mock' } })
+  if (path === '/api/health') return json({ ok: true, db: 'browser', carrier_mode: carrierMode, auth: false, refresh_running: db.data.jobs.some((j) => j.status === 'running'), carriers: { usps: carrierMode, fedex: carrierMode } })
   if (path === '/api/handoff') return json({ lan_url: null, public_url: null, hosted_ui_url: window.location.origin + (import.meta.env.BASE_URL || '/'), auth_required: false })
   if (path === '/api/auth/check') return json({ ok: true, auth: false })
 
@@ -597,7 +653,7 @@ async function handle(db: LocalDb, method: string, path: string, q: URLSearchPar
     if (sub === '/refresh' && method === 'POST') {
       const r = await refreshOne(db, s)
       db.touch()
-      if (r.error && s.carrier !== 'usps' && s.carrier !== 'fedex') return json({ detail: r.error }, 400)
+      if (r.error && (r.kind === 'disabled' || r.kind === 'auth' || r.kind === 'invalid')) return json({ detail: r.error }, 400)
       return json(rowOut(shipmentView(db, s)))
     }
     if (sub === '/notes' && method === 'POST') {
@@ -650,11 +706,34 @@ async function handle(db: LocalDb, method: string, path: string, q: URLSearchPar
     db.touch()
     return json(generalSettings(db))
   }
-  if (path === '/api/settings/carriers' && method === 'GET') return json(carrierSettings())
+  if (path === '/api/settings/carriers' && method === 'GET') return json(carrierSettings(db))
   if ((m = /^\/api\/settings\/carriers\/(usps|fedex)(\/test)?$/.exec(path))) {
-    if (m[2]) return json({ ok: true, message: 'Mock carrier: generates fake tracking data, no credentials needed' })
-    return json({ detail: NEEDS_APP }, 400)
+    if (m[2]) {
+      if (!relayConfig(db)) return json({ ok: true, message: 'Mock carrier: generates fake tracking data, no credentials needed' })
+      const r = await runRelayTest(db)
+      if (!r.ok) return json({ ok: false, message: ((await r.json()) as { detail: string }).detail })
+      const c = db.data.settings.relay_check?.carriers[m[1] as 'usps' | 'fedex']
+      return json({ ok: !!c?.ok, message: c?.message ?? 'No result' })
+    }
+    return json({ detail: NEEDS_RELAY }, 400)
   }
+  if (path === '/api/settings/relay' && method === 'GET') return json(relaySettings(db))
+  if (path === '/api/settings/relay' && method === 'PUT') {
+    const b = await jsonBody(input, init)
+    const s = db.data.settings
+    const url = normalizeRelayUrl(String(b.relay_url ?? ''))
+    if (url && !/^https:\/\//i.test(url) && !/^http:\/\/(localhost|127\.0\.0\.1)/i.test(url)) return json({ detail: 'The relay address must start with https://' }, 422)
+    if (url !== s.relay_url) s.relay_check = null
+    s.relay_url = url || null
+    if (typeof b.relay_token === 'string') {
+      s.relay_token = b.relay_token.trim() || null
+      s.relay_check = null
+    }
+    if (!s.relay_url) s.relay_token = null
+    db.touch()
+    return json(relaySettings(db))
+  }
+  if (path === '/api/settings/relay/test' && method === 'POST') return runRelayTest(db)
   if (path === '/api/settings/geocoder' && method === 'GET') return json({ provider: 'nominatim', api_key_masked: null, has_key: false, nominatim_email: null })
   if (path === '/api/settings/geocoder' && method === 'PUT') return json({ detail: 'Street-level geocoding needs the app running on your own computer. This browser uses the offline ZIP table.' }, 400)
   if (path === '/api/settings/geocoder/test') return json({ ok: false, message: 'Online geocoding is not available in this browser; ZIP-level placement is always on.' })

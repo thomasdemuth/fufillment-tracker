@@ -35,7 +35,7 @@ export interface TrackResult {
 export interface TrackError {
   ok: false
   tracking_number: string
-  kind: 'transient' | 'not_found' | 'disabled' | 'auth' | 'invalid'
+  kind: 'transient' | 'not_found' | 'disabled' | 'auth' | 'invalid' | 'rate_limited'
   message: string
 }
 
