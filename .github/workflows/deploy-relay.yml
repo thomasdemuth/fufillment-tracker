@@ -1,0 +1,95 @@
+# Deploys the tracking relay Worker (worker/) to your Cloudflare account and sets its secrets, so you never
+# need a terminal. One-time setup in the repository: Settings -> Secrets and variables -> Actions, then add
+#   CLOUDFLARE_API_TOKEN   (dash.cloudflare.com -> My Profile -> API Tokens -> Create Token -> "Edit Cloudflare Workers" template)
+#   CLOUDFLARE_ACCOUNT_ID  (Workers & Pages overview page, right-hand side)
+#   RELAY_TOKEN            (a password you make up; the site asks for it)
+#   USPS_CLIENT_ID, USPS_CLIENT_SECRET, FEDEX_API_KEY, FEDEX_SECRET_KEY (whichever carriers you have)
+# then Actions -> "deploy-relay" -> Run workflow. The run's summary shows the Worker address to paste into
+# Settings -> Carriers on the site. Re-run after changing any secret.
+name: deploy-relay
+on:
+  workflow_dispatch:
+    inputs:
+      usps_sandbox:
+        description: "Use the USPS test environment (until production Tracking access is approved)"
+        type: boolean
+        default: false
+      fedex_sandbox:
+        description: "Use the FedEx sandbox (only returns data for FedEx test tracking numbers)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the required repository secrets
+        env:
+          HAS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          HAS_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+          HAS_RELAY: ${{ secrets.RELAY_TOKEN != '' }}
+          HAS_USPS: ${{ secrets.USPS_CLIENT_ID != '' && secrets.USPS_CLIENT_SECRET != '' }}
+          HAS_FEDEX: ${{ secrets.FEDEX_API_KEY != '' && secrets.FEDEX_SECRET_KEY != '' }}
+        run: |
+          ok=true
+          [ "$HAS_TOKEN" = "true" ]   || { echo "::error::Add the CLOUDFLARE_API_TOKEN repository secret"; ok=false; }
+          [ "$HAS_ACCOUNT" = "true" ] || { echo "::error::Add the CLOUDFLARE_ACCOUNT_ID repository secret"; ok=false; }
+          [ "$HAS_RELAY" = "true" ]   || { echo "::error::Add the RELAY_TOKEN repository secret (any password you choose)"; ok=false; }
+          if [ "$HAS_USPS" != "true" ] && [ "$HAS_FEDEX" != "true" ]; then
+            echo "::warning::No carrier credentials set yet (USPS_CLIENT_ID/USPS_CLIENT_SECRET, FEDEX_API_KEY/FEDEX_SECRET_KEY). The relay deploys but will report both carriers as not configured."
+          fi
+          $ok
+      - name: Write sandbox flags into wrangler.toml
+        run: |
+          sed -i 's/^USPS_SANDBOX = .*/USPS_SANDBOX = "${{ inputs.usps_sandbox }}"/' wrangler.toml
+          sed -i 's/^FEDEX_SANDBOX = .*/FEDEX_SANDBOX = "${{ inputs.fedex_sandbox }}"/' wrangler.toml
+          grep -E "SANDBOX" wrangler.toml
+      - name: Deploy the Worker and its secrets
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: deploy
+          # Only the secrets that are set in the repository are pushed; empty ones are skipped by the action.
+          secrets: |
+            RELAY_TOKEN
+            USPS_CLIENT_ID
+            USPS_CLIENT_SECRET
+            FEDEX_API_KEY
+            FEDEX_SECRET_KEY
+        env:
+          RELAY_TOKEN: ${{ secrets.RELAY_TOKEN }}
+          USPS_CLIENT_ID: ${{ secrets.USPS_CLIENT_ID }}
+          USPS_CLIENT_SECRET: ${{ secrets.USPS_CLIENT_SECRET }}
+          FEDEX_API_KEY: ${{ secrets.FEDEX_API_KEY }}
+          FEDEX_SECRET_KEY: ${{ secrets.FEDEX_SECRET_KEY }}
+      - name: Check the relay answers and show the address
+        env:
+          URL: ${{ steps.deploy.outputs.deployment-url }}
+          RELAY_TOKEN: ${{ secrets.RELAY_TOKEN }}
+        run: |
+          echo "Worker address: $URL"
+          sleep 5
+          body=$(curl -sS -H "Authorization: Bearer $RELAY_TOKEN" "$URL/" || true)
+          echo "$body"
+          {
+            echo "## Tracking relay deployed"
+            echo
+            echo "Paste this into the site under **Settings → Carriers → Live tracking relay**, with your RELAY_TOKEN:"
+            echo
+            echo '```'
+            echo "$URL"
+            echo '```'
+            echo
+            echo "Relay health: \`$body\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "$body" | grep -q '"relay":"fulfillment-tracker"' || { echo "::error::The Worker did not answer as expected; see the output above"; exit 1; }
