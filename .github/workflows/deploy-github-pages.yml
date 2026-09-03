@@ -33,7 +33,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - name: Enable GitHub Pages (source: GitHub Actions)
+      - name: "Enable GitHub Pages (source GitHub Actions)"
         uses: actions/configure-pages@v5
         with:
           enablement: true
