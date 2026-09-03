@@ -1,5 +1,6 @@
 # Publishes the hosted UI (interface only, no data) to GitHub Pages on every push.
-# One-time setup: repo Settings -> Pages -> "Build and deployment" source = "GitHub Actions".
+# Pages is enabled automatically on the first run (configure-pages with enablement). If your account
+# disallows that, set repo Settings -> Pages -> "Build and deployment" source = "GitHub Actions" once.
 name: deploy-github-pages
 on:
   push:
@@ -24,12 +25,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - name: Enable GitHub Pages (source: GitHub Actions)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Build hosted UI under /<repo>/
         run: VITE_BASE="/${{ github.event.repository.name }}/" pnpm build:hosted
       - uses: actions/upload-pages-artifact@v3
