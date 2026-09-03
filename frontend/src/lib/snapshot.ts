@@ -16,6 +16,8 @@ export interface Snapshot {
   filters: Record<string, unknown>
   uploads: { id: number; filename: string; created_at: string; count: number }[]
   shipments: SnapshotShipment[]
+  /** set at runtime for the bundled sample dataset */
+  demo?: boolean
 }
 
 const DB = 'ft-snapshot'
@@ -85,6 +87,16 @@ export function parseSnapshot(text: string): Snapshot {
 
 export async function readSnapshotFile(file: File): Promise<Snapshot> {
   return parseSnapshot(await file.text())
+}
+
+/** Bundled demo data (fake shipments) shown on desktop when the hosted site has nothing else to show. */
+export async function loadDemoSnapshot(): Promise<Snapshot> {
+  const base = import.meta.env.BASE_URL || '/'
+  const r = await fetch(`${base}demo/demo.snapshot.json`)
+  if (!r.ok) throw new Error(`Demo data unavailable (${r.status})`)
+  const snap = parseSnapshot(await r.text())
+  snap.demo = true
+  return snap
 }
 
 /** In-memory current snapshot (set by the gate). */

@@ -88,7 +88,9 @@ page with a sticky carrier button, and a full-bleed map with a bottom sheet.
 ### Hosting the UI on GitHub Pages (no data leaves your machine)
 
 The interface is a static site and is published to GitHub Pages by `.github/workflows/deploy-github-pages.yml` on
-every push. It holds **no data**: it only ever shows a snapshot file you opened, or talks to a server you point it at.
+every push. It holds **no data**: it shows a snapshot file you opened, or talks to a server you point it at. On a
+desktop browser it opens straight into a demo with made-up shipments (so the site is a live preview of the app); on a
+phone it opens with the snapshot-file screen, which is where a handoff link lands.
 
 One-time setup: in the repository, **Settings → Pages → Build and deployment → Source: GitHub Actions**. The next push
 (or a manual run of the workflow) publishes the site at `https://<your-github-user>.github.io/fufillment-tracker/`.

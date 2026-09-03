@@ -54,6 +54,8 @@ function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: t
 
 export function AppShell() {
   const setPaletteOpen = useUiStore((s) => s.setPaletteOpen)
+  const layout = useUiStore((s) => s.layout)
+  const setLayout = useUiStore((s) => s.setLayout)
   return (
     <div className="flex h-full">
       <aside className="flex w-[216px] shrink-0 flex-col border-r border-border bg-panel">
@@ -73,7 +75,12 @@ export function AppShell() {
             <NavItem key={n.to} {...n} />
           ))}
         </nav>
-        <div className="mt-auto flex items-center justify-between px-3 py-3">
+        {layout === 'desktop' && (
+          <button onClick={() => setLayout('auto')} className="mx-3 mt-auto rounded-control px-3 py-1.5 text-left text-[11px] text-muted hover:bg-panel-2 hover:text-text">
+            Desktop layout forced · use automatic
+          </button>
+        )}
+        <div className={cn('flex items-center justify-between px-3 py-3', layout !== 'desktop' && 'mt-auto')}>
           <Button variant="outline" size="sm" onClick={() => setPaletteOpen(true)} className="text-text-2">
             <Search className="h-3.5 w-3.5" /> Search <kbd className="ml-1 rounded border border-border bg-panel-2 px-1 text-[10px] text-muted">⌘K</kbd>
           </Button>

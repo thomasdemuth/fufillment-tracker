@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
-import { AlertTriangle, LayoutList, Map, MoreHorizontal, Settings, ShieldCheck, Upload } from 'lucide-react'
+import { AlertTriangle, LayoutList, Map, Monitor, MoreHorizontal, Settings, ShieldCheck, Upload } from 'lucide-react'
 import { Logo } from '@/components/layout/Logo'
 import { ThemeToggle } from '@/components/layout/AppShell'
 import { CommandPalette } from '@/components/layout/CommandPalette'
@@ -8,6 +8,7 @@ import { SnapshotBanner } from '@/components/layout/SnapshotBanner'
 import { ShareButton } from '@/components/layout/ShareButton'
 import { Sheet } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
+import { useUiStore } from '@/stores/uiStore'
 
 const tabs = [
   { to: '/map', label: 'Map', icon: Map },
@@ -19,6 +20,7 @@ const tabs = [
 export function MobileShell() {
   const [more, setMore] = useState(false)
   const loc = useLocation()
+  const setLayout = useUiStore((s) => s.setLayout)
   const moreActive = loc.pathname.startsWith('/settings') || loc.pathname.startsWith('/privacy')
   return (
     <div className="flex h-full flex-col bg-bg">
@@ -54,6 +56,9 @@ export function MobileShell() {
               <Icon className="h-4.5 w-4.5 text-muted" /> {label}
             </NavLink>
           ))}
+          <button onClick={() => setLayout('desktop')} className="flex items-center gap-3 rounded-control px-3 py-3 text-left text-[14px] hover:bg-panel-2">
+            <Monitor className="h-4.5 w-4.5 text-muted" /> Switch to desktop layout
+          </button>
           <div className="mt-2 flex items-center justify-between rounded-control bg-panel-2 px-3 py-2 text-[13px]">
             <span className="flex items-center gap-2">
               <Logo className="h-5 w-5" /> Theme

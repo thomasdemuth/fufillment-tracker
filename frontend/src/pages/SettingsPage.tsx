@@ -13,6 +13,7 @@ import {
   type CarrierSettings,
 } from '@/api/queries'
 import { PageHeader, ThemeToggle } from '@/components/layout/AppShell'
+import { useUiStore } from '@/stores/uiStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Label, Select } from '@/components/ui/input'
@@ -270,6 +271,8 @@ function GeocodingTab() {
 }
 
 function GeneralTab() {
+  const layout = useUiStore((s) => s.layout)
+  const setLayout = useUiStore((s) => s.setLayout)
   const q = useGeneralSettings()
   const save = useSaveGeneral()
   const [stuck, setStuck] = useState(7)
@@ -327,6 +330,14 @@ function GeneralTab() {
           <ThemeToggle />
         </CardHeader>
         <CardBody className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <Label>Layout (this browser only)</Label>
+            <Select value={layout} onChange={(e) => setLayout(e.target.value as 'auto' | 'desktop' | 'phone')} className="w-64">
+              <option value="auto">Automatic (phone layout under 768px)</option>
+              <option value="desktop">Always desktop</option>
+              <option value="phone">Always phone</option>
+            </Select>
+          </label>
           <label className="flex flex-col gap-1">
             <Label>Basemap style URL, light theme (empty = OpenFreeMap Positron; see README for a fully offline PMTiles setup)</Label>
             <Input value={style} onChange={(e) => setStyle(e.target.value)} placeholder="https://tiles.openfreemap.org/styles/positron" />

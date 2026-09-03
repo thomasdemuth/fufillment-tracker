@@ -3,6 +3,17 @@ import { create } from 'zustand'
 
 export type Theme = 'light' | 'dark' | 'system'
 export type MapMode = 'points' | 'heatmap' | 'states'
+export type LayoutPref = 'auto' | 'desktop' | 'phone'
+
+function readLayout(): LayoutPref {
+  try {
+    const v = localStorage.getItem('ft.layout')
+    if (v === 'desktop' || v === 'phone' || v === 'auto') return v
+  } catch {
+    /* ignore */
+  }
+  return 'auto'
+}
 
 function readTheme(): Theme {
   try {
@@ -54,6 +65,9 @@ interface UiState {
   setMapMode: (m: MapMode) => void
   paletteOpen: boolean
   setPaletteOpen: (open: boolean) => void
+  /** Force the desktop or phone layout regardless of window width. */
+  layout: LayoutPref
+  setLayout: (l: LayoutPref) => void
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -78,4 +92,13 @@ export const useUiStore = create<UiState>((set) => ({
   },
   paletteOpen: false,
   setPaletteOpen: (paletteOpen) => set({ paletteOpen }),
+  layout: readLayout(),
+  setLayout: (layout) => {
+    try {
+      localStorage.setItem('ft.layout', layout)
+    } catch {
+      /* ignore */
+    }
+    set({ layout })
+  },
 }))
