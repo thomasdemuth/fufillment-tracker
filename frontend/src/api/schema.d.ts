@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Config */
+        get: operations["config_api_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/uploads": {
         parameters: {
             query?: never;
@@ -174,6 +191,40 @@ export interface paths {
         };
         /** Facets */
         get: operations["facets_api_shipments_facets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/map/points.geojson": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Points */
+        get: operations["points_api_map_points_geojson_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/map/states": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** States */
+        get: operations["states_api_map_states_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -505,6 +556,28 @@ export interface components {
 export type $defs = Record<string, never>;
 export interface operations {
     health_api_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    config_api_config_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -936,6 +1009,98 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Facets"];
+                };
+            };
+        };
+    };
+    points_api_map_points_geojson_get: {
+        parameters: {
+            query?: {
+                status?: string[] | null;
+                carrier?: string[] | null;
+                upload_id?: string[] | null;
+                state?: string[] | null;
+                tag?: string[] | null;
+                city?: string | null;
+                q?: string | null;
+                ship_date_from?: string | null;
+                ship_date_to?: string | null;
+                last_event_from?: string | null;
+                last_event_to?: string | null;
+                days_min?: number | null;
+                days_max?: number | null;
+                attention?: boolean | null;
+                geocoded?: boolean | null;
+                ids?: string[] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    states_api_map_states_get: {
+        parameters: {
+            query?: {
+                status?: string[] | null;
+                carrier?: string[] | null;
+                upload_id?: string[] | null;
+                state?: string[] | null;
+                tag?: string[] | null;
+                city?: string | null;
+                q?: string | null;
+                ship_date_from?: string | null;
+                ship_date_to?: string | null;
+                last_event_from?: string | null;
+                last_event_to?: string | null;
+                days_min?: number | null;
+                days_max?: number | null;
+                attention?: boolean | null;
+                geocoded?: boolean | null;
+                ids?: string[] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

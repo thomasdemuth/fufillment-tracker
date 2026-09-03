@@ -11,7 +11,12 @@ def test_upload_preview_and_commit(client, demo_dir: Path):
     assert p["row_count"] == 140
     assert p["suggested_mapping"]["tracking_number"] == "Tracking Number"
     assert p["carrier_detection"]["usps"] > 0
-    body = {"sheet": p["sheet"], "header_row": p["header_row"], "mapping": p["suggested_mapping"], "save_preset_as": "Shopify export"}
+    body = {
+        "sheet": p["sheet"],
+        "header_row": p["header_row"],
+        "mapping": p["suggested_mapping"],
+        "save_preset_as": "Shopify export",
+    }
     r = client.post(f"/api/uploads/{p['upload_id']}/commit", json=body)
     assert r.status_code == 200, r.text
     res = r.json()
@@ -34,7 +39,9 @@ def test_dedupe_across_uploads(client, demo_dir: Path):
 def test_messy_csv_maps_and_geocodes(client, demo_dir: Path):
     res = upload_and_commit(client, demo_dir / "batch_3_messy.csv")
     assert res["imported"] == 70
-    rows = client.get("/api/shipments", params={"upload_id": res["upload"]["id"], "page_size": 500}).json()["items"]
+    rows = client.get("/api/shipments", params={"upload_id": res["upload"]["id"], "page_size": 500}).json()[
+        "items"
+    ]
     assert all(r["state"] and r["postal_code"] for r in rows)
     assert sum(1 for r in rows if r["dest_lat"] is not None) >= 65
     assert all(r["ship_date"] for r in rows)

@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { Feature, FeatureCollection, Point } from 'geojson'
 import { api, unwrap } from './client'
 import type { components } from './schema'
 import { filtersToQuery, type Filters } from '@/lib/filters'
@@ -113,5 +114,37 @@ export function useDeleteUpload() {
   return useMutation({
     mutationFn: async (upload_id: number) => unwrap(await api.DELETE('/api/uploads/{upload_id}', { params: { path: { upload_id } } })),
     onSuccess: invalidate,
+  })
+}
+
+export type AppConfig = { app_name: string; map_style_url: string; carrier_mode: string; auth_enabled: boolean; stuck_days: number }
+
+export function useConfig() {
+  return useQuery({
+    queryKey: ['config'],
+    queryFn: async () => unwrap(await api.GET('/api/config')) as AppConfig,
+    staleTime: Infinity,
+  })
+}
+
+export type PointFeature = Feature<Point, { id: number; s: string; c: string; p: string; n: string | null; pl: string; t: string; w: number }>
+export type PointCollection = FeatureCollection<Point, PointFeature['properties']>
+export type StateCounts = Record<string, { total: number; by_status: Record<string, number> }>
+
+export function useMapPoints(f: Partial<Filters>) {
+  const query = filtersToQuery(f) as Query
+  return useQuery({
+    queryKey: ['map', 'points', query],
+    queryFn: async () => unwrap(await api.GET('/api/map/points.geojson', { params: { query } })) as PointCollection,
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useMapStates(f: Partial<Filters>) {
+  const query = filtersToQuery(f) as Query
+  return useQuery({
+    queryKey: ['map', 'states', query],
+    queryFn: async () => unwrap(await api.GET('/api/map/states', { params: { query } })) as StateCounts,
+    placeholderData: keepPreviousData,
   })
 }

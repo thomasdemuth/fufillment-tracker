@@ -4,7 +4,9 @@ from app.services.mapping import header_signature, suggest_mapping
 
 
 def test_maps_common_headers():
-    m = suggest_mapping(["Order #", "Customer Name", "Address 1", "City", "State", "ZIP", "Tracking Number", "Carrier"])
+    m = suggest_mapping(
+        ["Order #", "Customer Name", "Address 1", "City", "State", "ZIP", "Tracking Number", "Carrier"]
+    )
     assert m["tracking_number"] == "Tracking Number"
     assert m["recipient_name"] == "Customer Name"
     assert m["address1"] == "Address 1"
@@ -34,6 +36,8 @@ def test_detects_combined_city_state_zip():
     assert m["city_state_zip"] == "Location"
 
 
-@pytest.mark.parametrize("a,b,same", [(["Name", "ZIP"], ["zip", "name"], True), (["Name"], ["Name", "ZIP"], False)])
+@pytest.mark.parametrize(
+    "a,b,same", [(["Name", "ZIP"], ["zip", "name"], True), (["Name"], ["Name", "ZIP"], False)]
+)
 def test_signature(a, b, same):
     assert (header_signature(a) == header_signature(b)) is same
