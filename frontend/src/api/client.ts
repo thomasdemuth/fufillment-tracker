@@ -1,8 +1,10 @@
 import createClient, { type Middleware } from 'openapi-fetch'
 import type { paths } from './schema'
-import { authHeaders, getServerUrl } from '@/lib/server'
+import { apiUrl, authHeaders, getServerUrl } from '@/lib/server'
 import { getSnapshot } from '@/lib/snapshot'
 import { snapshotFetch } from '@/api/localServer'
+import { getLocalDb } from '@/local/state'
+import { localFetch } from '@/local/server'
 
 export class ApiError extends Error {
   status: number
@@ -26,17 +28,46 @@ const middleware: Middleware = {
   },
 }
 
-function makeClient() {
+/** The fetch() to use for the active data source: snapshot file, this browser's database, or the real network. */
+export function dataFetch(): typeof fetch | null {
   const snap = getSnapshot()
-  const c = snap
-    ? createClient<paths>({ baseUrl: window.location.origin, fetch: snapshotFetch(snap) })
+  if (snap) return snapshotFetch(snap)
+  const db = getLocalDb()
+  if (db) return localFetch(db)
+  return null
+}
+
+function makeClient() {
+  const local = dataFetch()
+  const c = local
+    ? createClient<paths>({ baseUrl: window.location.origin, fetch: local })
     : createClient<paths>({ baseUrl: getServerUrl() || '/', credentials: getServerUrl() ? 'omit' : 'same-origin' })
   c.use(middleware)
   return c
 }
 
+/** Snapshot files cannot be changed. */
 export function isReadOnly(): boolean {
   return getSnapshot() != null
+}
+
+/** Data lives in this browser (no server). */
+export function isLocal(): boolean {
+  return getSnapshot() == null && getLocalDb() != null
+}
+
+/**
+ * fetch() for API calls made outside the typed client (file upload, downloads): routed to the snapshot /
+ * browser database when one is active, otherwise to the configured server with the auth header.
+ */
+export async function rawFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const local = dataFetch()
+  if (local) return local(new URL(path, window.location.origin).toString(), init)
+  const headers = new Headers(init.headers)
+  for (const [k, v] of Object.entries(authHeaders())) headers.set(k, v)
+  const res = await fetch(apiUrl(path), { ...init, headers })
+  if (res.status === 401) authEvents.dispatchEvent(new Event('unauthorized'))
+  return res
 }
 
 let _api = makeClient()

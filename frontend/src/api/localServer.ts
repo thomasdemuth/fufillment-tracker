@@ -90,7 +90,7 @@ export function applySort(rows: SnapshotShipment[], sort: string | null): Snapsh
   })
 }
 
-function rowOut(r: SnapshotShipment) {
+export function rowOut(r: SnapshotShipment) {
   return { ...r, days_in_transit: daysInTransit(r) }
 }
 
@@ -110,15 +110,22 @@ function jitter(id: number): [number, number] {
   return [(a - 0.5) * 0.008, (b - 0.5) * 0.008]
 }
 
-function json(body: unknown, status = 200, headers: Record<string, string> = {}): Response {
+export function json(body: unknown, status = 200, headers: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } })
 }
 
+export function apiPath(url: URL): string {
+  return url.pathname.replace(/^.*?\/api\//, '/api/')
+}
+
 export function handleLocal(snapshot: Snapshot, method: string, url: URL): Response {
-  const path = url.pathname.replace(/^.*?\/api\//, '/api/')
-  const q = url.searchParams
-  const all = snapshot.shipments
   if (method !== 'GET') return json({ detail: 'This is a read-only snapshot. Open the app on your server to make changes.' }, 405)
+  return handleRead(snapshot, apiPath(url), url.searchParams) ?? json({ detail: `Not available in a snapshot: ${apiPath(url)}` }, 404)
+}
+
+/** Read-only routes over a snapshot-shaped dataset. Returns null for routes it does not know. */
+export function handleRead(snapshot: Snapshot, path: string, q: Query): Response | null {
+  const all = snapshot.shipments
 
   if (path === '/api/config') {
     return json({ app_name: snapshot.app_name, map_style_url: snapshot.map_style_url, map_style_url_dark: snapshot.map_style_url_dark, carrier_mode: 'snapshot', auth_enabled: false, stuck_days: snapshot.stuck_days })
@@ -212,10 +219,10 @@ export function handleLocal(snapshot: Snapshot, method: string, url: URL): Respo
       .sort((a, b) => Math.min(...a.reasons.map((x) => prio[x] ?? 5)) - Math.min(...b.reasons.map((x) => prio[x] ?? 5)))
     return json(rows)
   }
-  return json({ detail: `Not available in a snapshot: ${path}` }, 404)
+  return null
 }
 
-function pathGeojson(r: SnapshotShipment) {
+export function pathGeojson(r: SnapshotShipment) {
   const features: unknown[] = []
   const coords: number[][] = []
   const events = [...r.events].filter((e) => e.lat != null && e.lng != null).sort((a, b) => (a.event_at ?? '').localeCompare(b.event_at ?? ''))

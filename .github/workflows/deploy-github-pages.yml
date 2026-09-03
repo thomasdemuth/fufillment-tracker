@@ -4,7 +4,7 @@
 name: deploy-github-pages
 on:
   push:
-    branches: [main, master, claude/shipment-tracking-dashboard-mj9c5h]
+    branches: [main, master, claude/shipment-tracking-dashboard-mj9c5h, claude/mock-data-github-upload-5g9pjt]
   workflow_dispatch:
 
 permissions:

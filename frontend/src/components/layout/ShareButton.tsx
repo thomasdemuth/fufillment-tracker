@@ -3,10 +3,10 @@ import { useLocation } from 'react-router'
 import { toast } from 'sonner'
 import { Check, Copy, Download, Smartphone } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { api, isReadOnly, unwrap } from '@/api/client'
+import { api, isLocal, isReadOnly, rawFetch, unwrap } from '@/api/client'
 import { Button } from '@/components/ui/button'
 import { dataFilters, filtersToParams, parseFilters } from '@/lib/filters'
-import { HOSTED, apiUrl, authHeaders, getServerUrl } from '@/lib/server'
+import { HOSTED, getServerUrl } from '@/lib/server'
 
 type Handoff = { lan_url: string | null; public_url: string | null; hosted_ui_url: string | null; auth_required: boolean }
 
@@ -21,7 +21,7 @@ export function buildHandoffLink(h: Handoff, path: string, currentOrigin: string
   if (HOSTED) {
     const server = getServerUrl()
     const u = new URL(path, currentOrigin)
-    if (server && !isReadOnly()) {
+    if (server && !isReadOnly() && !isLocal()) {
       u.searchParams.set('server', server)
       return { url: u.toString(), note: 'Opens this site connected to your server.', mode: 'hosted-server' }
     }
@@ -44,7 +44,7 @@ export function buildHandoffLink(h: Handoff, path: string, currentOrigin: string
 async function downloadSnapshot(search: string) {
   const f = parseFilters(new URLSearchParams(search))
   const p = filtersToParams(dataFilters(f))
-  const res = await fetch(apiUrl(`/api/snapshot?${p.toString()}`), { headers: authHeaders() })
+  const res = await rawFetch(`/api/snapshot?${p.toString()}`)
   if (!res.ok) throw new Error(`Snapshot failed (${res.status})`)
   const blob = await res.blob()
   const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? 'shipments.snapshot.json'
