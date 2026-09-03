@@ -19,6 +19,7 @@ import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Label, Select } from '@/components/ui/input'
 import { fmtRelative } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { isLocal } from '@/api/client'
 
 type Tab = 'carriers' | 'geocoding' | 'general'
 
@@ -62,8 +63,21 @@ const CARRIER_INFO = {
   },
 } as const
 
+function LocalNotice({ children }: { children: React.ReactNode }) {
+  return <div className="rounded-control border border-accent/30 bg-accent-soft px-3 py-2 text-sm text-text-2">{children}</div>
+}
+
 function CarriersTab() {
   const q = useCarrierSettings()
+  if (isLocal()) {
+    return (
+      <div className="flex flex-col gap-4">
+        <LocalNotice>
+          Your data is kept in this browser, which has no server to call USPS or FedEx. Refresh uses the built-in <span className="font-medium text-text">mock</span> carrier (fake but realistic statuses). For live tracking with your own free developer credentials, run the app on your computer; see the README.
+        </LocalNotice>
+      </div>
+    )
+  }
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted">
@@ -221,6 +235,9 @@ function GeocodingTab() {
           Every shipment is placed at the center of its ZIP code using a bundled database of US ZIP codes. Nothing leaves this machine. If a ZIP is missing, the city or state center is used instead. This is accurate enough for heatmaps and regional views.
         </CardBody>
       </Card>
+      {isLocal() ? (
+        <LocalNotice>Street-level geocoding needs the app running on your computer. In this browser every shipment is placed by ZIP code, which is enough for the map, heatmap and by-state views.</LocalNotice>
+      ) : (
       <Card>
         <CardHeader>
           <CardTitle>Street-level geocoding (opt-in per upload)</CardTitle>
@@ -266,6 +283,7 @@ function GeocodingTab() {
           </div>
         </CardBody>
       </Card>
+      )}
     </div>
   )
 }
@@ -308,6 +326,7 @@ function GeneralTab() {
           </label>
         </CardBody>
       </Card>
+      {!isLocal() && (
       <Card>
         <CardHeader>
           <CardTitle>Phone access</CardTitle>
@@ -324,6 +343,7 @@ function GeneralTab() {
           </label>
         </CardBody>
       </Card>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>Map & appearance</CardTitle>

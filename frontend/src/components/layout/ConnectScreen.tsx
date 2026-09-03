@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileJson, Link2, Lock, Smartphone, UploadCloud } from 'lucide-react'
+import { Database, FileJson, Link2, Lock, Smartphone, UploadCloud } from 'lucide-react'
 import { Logo } from '@/components/layout/Logo'
 import { Button } from '@/components/ui/button'
 import { Input, Label } from '@/components/ui/input'
@@ -15,7 +15,22 @@ type Mode = 'connect' | 'login'
  * Hosted build only: this site is just the interface. Data comes either from a snapshot file made by
  * "Send to phone" on the desktop app, or from the user's own server. Nothing is sent anywhere else.
  */
-export function ConnectScreen({ mode, initialError, onDone, onSnapshot }: { mode: Mode; initialError?: string; onDone: () => void; onSnapshot?: (s: Snapshot) => Promise<void> }) {
+export function ConnectScreen({
+  mode,
+  initialError,
+  onDone,
+  onSnapshot,
+  onLocal,
+  hasLocalData = false,
+}: {
+  mode: Mode
+  initialError?: string
+  onDone: () => void
+  onSnapshot?: (s: Snapshot) => Promise<void>
+  /** Keep data in this browser instead (hosted build, no server). */
+  onLocal?: () => Promise<void>
+  hasLocalData?: boolean
+}) {
   const mobile = useIsMobile()
   const [server, setServer] = useState(getServerUrl())
   const [password, setPassword] = useState('')
@@ -74,6 +89,19 @@ export function ConnectScreen({ mode, initialError, onDone, onSnapshot }: { mode
   }
 
   const showFile = !!onSnapshot && mode === 'connect'
+  const showLocal = !!onLocal && mode === 'connect'
+  const [localBusy, setLocalBusy] = useState(false)
+  const startLocal = async () => {
+    if (!onLocal) return
+    setLocalBusy(true)
+    try {
+      await onLocal()
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setLocalBusy(false)
+    }
+  }
 
   return (
     <div className="flex min-h-full flex-col items-center justify-center bg-bg p-4 sm:p-8">
@@ -84,6 +112,25 @@ export function ConnectScreen({ mode, initialError, onDone, onSnapshot }: { mode
           <div className="text-[12px] text-muted">Interface only. Your shipments stay on your own computer or in the file you open.</div>
         </div>
       </div>
+      {showLocal && (
+        <button
+          onClick={startLocal}
+          disabled={localBusy}
+          data-testid="use-this-browser"
+          className="mb-4 flex w-full max-w-4xl items-center gap-3 rounded-card border border-border bg-panel p-4 text-left shadow-pop transition-colors hover:border-accent hover:bg-panel-2/60"
+        >
+          <Database className="h-5 w-5 shrink-0 text-accent" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-semibold">{hasLocalData ? 'Open my data in this browser' : 'Keep my data in this browser'}</span>
+            <span className="block text-[12.5px] text-text-2">
+              {hasLocalData
+                ? 'Continue with the shipments already saved on this device.'
+                : 'Upload spreadsheets right here, with no server. Everything stays on this device and is never uploaded anywhere.'}
+            </span>
+          </span>
+          <span className="shrink-0 text-[13px] font-medium text-accent">{localBusy ? 'Opening…' : 'Start →'}</span>
+        </button>
+      )}
       <div className={cn('grid w-full gap-4', showFile ? 'max-w-4xl md:grid-cols-2' : 'max-w-md')}>
         {showFile && (
           <label

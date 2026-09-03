@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/layout/AppShell'
 import { Button } from '@/components/ui/button'
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card'
 import { fmtBytes, fmtDate, fmtNumber } from '@/lib/format'
+import { isLocal } from '@/api/client'
 
 const PURPOSE: Record<string, string> = {
   carrier_usps: 'USPS tracking API',
@@ -83,7 +84,11 @@ export function PrivacyPage() {
                 <Stat label="Raw files" value={s ? fmtBytes(s.uploads_size_bytes) : '—'} />
                 <Stat label="Password" value={s?.auth_enabled ? 'on' : 'off'} />
               </div>
-              <p className="mt-3 text-xs text-muted">Back up the data directory to keep everything; delete it to remove everything. Raw spreadsheets are kept so an upload can be re-parsed, and are deleted with it.</p>
+              <p className="mt-3 text-xs text-muted">
+                {isLocal()
+                  ? 'Everything is in this browser\u2019s storage on this device: no server, no account, nothing sent to GitHub. Use Send to phone (a snapshot file) or Export as a backup. Clearing this site\u2019s data in the browser removes it all.'
+                  : 'Back up the data directory to keep everything; delete it to remove everything. Raw spreadsheets are kept so an upload can be re-parsed, and are deleted with it.'}
+              </p>
             </CardBody>
           </Card>
 
@@ -115,7 +120,7 @@ export function PrivacyPage() {
               <span className="text-[11px] text-muted">hosts only, never payloads</span>
             </CardHeader>
             <CardBody className="text-sm">
-              {s?.egress.length === 0 && <div className="text-xs text-muted">No outbound requests have been made by the server yet.</div>}
+              {s?.egress.length === 0 && <div className="text-xs text-muted">{isLocal() ? 'This browser makes no data requests: carriers are mocked and geocoding is offline. Only map tiles are fetched.' : 'No outbound requests have been made by the server yet.'}</div>}
               {s && s.egress.length > 0 && (
                 <table className="w-full text-xs">
                   <thead className="text-left text-muted">

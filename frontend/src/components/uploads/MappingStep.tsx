@@ -3,6 +3,7 @@ import { AlertTriangle, Check } from 'lucide-react'
 import type { PresetOut, UploadPreview } from '@/api/queries'
 import { Input, Label, Select } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { isLocal } from '@/api/client'
 
 export type Mapping = Record<string, string>
 
@@ -147,6 +148,7 @@ export function MappingStep({
                 <div className="text-[11px] text-muted">Points land at the ZIP-code center. Nothing leaves this machine.</div>
               </span>
             </label>
+            {!isLocal() && (
             <label className="flex items-start gap-2">
               <input type="radio" checked={state.geocode_mode === 'online'} onChange={() => onChange({ geocode_mode: 'online' })} className="mt-1" />
               <span>
@@ -154,6 +156,7 @@ export function MappingStep({
                 <div className="text-[11px] text-muted">Sends street addresses to the geocoder chosen in Settings. Exact pins.</div>
               </span>
             </label>
+            )}
           </div>
         </div>
         <div>

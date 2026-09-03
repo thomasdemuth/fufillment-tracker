@@ -5,6 +5,20 @@ data/
 *.db-shm
 .env
 
+# shipment data must never be committed: snapshot files (names + addresses) and any spreadsheet
+# dropped into the tree. The only exception is the bundled demo, which is generated from fake seed data.
+*.snapshot.json
+!frontend/public/demo/demo.snapshot.json
+*.xlsx
+*.xls
+*.csv
+!demo/batch_*.xlsx
+!demo/batch_*.csv
+!backend/tests/fixtures/**
+
+# bundled static data (not runtime data)
+!backend/app/geocode/data/
+
 # python
 __pycache__/
 *.pyc
@@ -16,6 +30,7 @@ __pycache__/
 # node
 node_modules/
 frontend/dist/
+frontend/dist-hosted/
 frontend/test-results/
 frontend/playwright-report/
 

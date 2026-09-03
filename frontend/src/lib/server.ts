@@ -56,13 +56,20 @@ export function getServerUrl(): string {
   return read(KEY_BASE) ?? (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 }
 
-export type DataMode = 'server' | 'snapshot'
+/**
+ * Where the data comes from:
+ * - server: the backend (self-hosted build) or the server URL saved in this browser (hosted build)
+ * - snapshot: a read-only file exported by "Send to phone" (or the bundled demo)
+ * - local: the user's own data kept in this browser's IndexedDB (hosted build, no server needed)
+ */
+export type DataMode = 'server' | 'snapshot' | 'local'
 const KEY_MODE = 'ft.mode'
 export function getDataMode(): DataMode {
-  return read(KEY_MODE) === 'snapshot' ? 'snapshot' : 'server'
+  const v = read(KEY_MODE)
+  return v === 'snapshot' || v === 'local' ? v : 'server'
 }
 export function setDataMode(m: DataMode) {
-  write(KEY_MODE, m === 'snapshot' ? 'snapshot' : null)
+  write(KEY_MODE, m === 'server' ? null : m)
 }
 
 export function setServerUrl(v: string | null) {

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Dropzone } from '@/components/uploads/Dropzone'
 import { MappingStep, type MappingState } from '@/components/uploads/MappingStep'
 import { cn } from '@/lib/utils'
+import { isLocal } from '@/api/client'
 
 type Step = 'file' | 'map' | 'done'
 
@@ -126,7 +127,11 @@ export function UploadWizardPage() {
                 </ul>
               </details>
             )}
-            <p className="mt-4 text-sm text-muted">Statuses are fetched when you click Refresh on the board (only tracking numbers are sent to the carrier).</p>
+            <p className="mt-4 text-sm text-muted">
+              {isLocal()
+                ? 'Click Refresh on the board to fill in statuses. In this browser they come from the built-in mock carrier (fake but realistic); live USPS/FedEx tracking needs the app on your own computer.'
+                : 'Statuses are fetched when you click Refresh on the board (only tracking numbers are sent to the carrier).'}
+            </p>
             <div className="mt-5 flex justify-center gap-2">
               <Button variant="outline" onClick={() => navigate(`/board?upload_id=${result.upload.id}`)}>
                 View on board

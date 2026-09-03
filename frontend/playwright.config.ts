@@ -18,5 +18,7 @@ export default defineConfig({
     { name: 'desktop', use: { viewport: { width: 1400, height: 900 } }, testMatch: /smoke\.spec\.ts/ },
     { name: 'mobile', dependencies: ['desktop'], use: { ...devices['iPhone 13'], browserName: 'chromium', launchOptions }, testMatch: /mobile\.spec\.ts/ },
     { name: 'hosted', dependencies: ['desktop'], use: { ...devices['iPhone 13'], browserName: 'chromium', launchOptions }, testMatch: /hosted\.spec\.ts/ },
+    // No backend needed: the hosted build with data kept in the browser.
+    { name: 'hosted-local', use: { viewport: { width: 1400, height: 900 }, launchOptions }, testMatch: /hosted-local\.spec\.ts/ },
   ],
 })

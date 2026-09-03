@@ -1,6 +1,6 @@
 # Fulfillment Tracker — Handoff
 
-_Last updated: 2026-09-03. Branch: `claude/shipment-tracking-dashboard-mj9c5h`._
+_Last updated: 2026-09-03. Branch: `claude/mock-data-github-upload-5g9pjt` (on top of `claude/shipment-tracking-dashboard-mj9c5h`)._
 
 ## What this is
 
@@ -50,11 +50,18 @@ Key design points:
   are validated for colorblind separation on the map; status is never color-alone elsewhere.
 - **Two layouts, one component tree.** `useIsMobile()` switches between `AppShell` (sidebar, table, drawer) and
   `MobileShell` (bottom tabs, cards, sheets). Users can force a layout in Settings → General.
-- **Hosted UI has no data.** The GitHub Pages build (`VITE_HOSTED=1`, base `/fufillment-tracker/`) runs from a
-  snapshot file or connects to a user-run server over CORS with a bearer token. On desktop it boots into a bundled demo
-  snapshot (`frontend/public/demo/demo.snapshot.json`, fake data from `make seed`); on phones it shows the
-  open-a-file screen. Regenerate the demo file with `curl localhost:8000/api/snapshot > frontend/public/demo/demo.snapshot.json`
-  after `make seed demo`.
+- **Hosted UI has no data of its own.** The GitHub Pages build (`VITE_HOSTED=1`, base `/fufillment-tracker/`) has
+  three data sources, chosen in `AppGate` and remembered in `localStorage` (`ft.mode`):
+  - `snapshot`: a read-only file from "Send to phone", or the bundled demo (`frontend/public/demo/demo.snapshot.json`,
+    fake data). Desktop boots into the demo; phones show the open-a-file screen.
+  - `local`: the user's own data in IndexedDB, read-write, no server. `frontend/src/local/` ports the backend
+    (spreadsheet reading via SheetJS, mapping, importer, offline ZIP geocoding from `public/geo/us_zips.txt`, mock
+    carrier, jobs, notes/tags, export, snapshot export); `local/server.ts` answers the same `/api/...` paths, so the
+    pages are unchanged. Live carriers and online geocoding are not available here (Settings explains why).
+  - `server`: a user-run backend over CORS with a bearer token.
+  Regenerate the demo file only with `make demo-snapshot` (throwaway database seeded from `demo/`), never from a real
+  database: `.gitignore` blocks `*.snapshot.json` and spreadsheets outside `demo/` and test fixtures, and
+  `frontend/dist-hosted/` is no longer tracked (the workflow builds it).
 
 ## Phone handoff (how "Send to phone" works)
 
@@ -94,7 +101,8 @@ Done and tested: upload wizard with header detection and presets; dedupe across 
 opt-in online geocoding (Nominatim/Geocodio/Mapbox); map with clusters/heatmap/states; board with all filters,
 sort, columns, pagination, CSV/XLSX export; shipment detail with stepper, path, timeline, notes, tags, edit, delete;
 refresh jobs with progress; attention page; settings; privacy page with egress log and wipe; mobile layout; snapshot
-handoff; GitHub Pages deploy.
+handoff; GitHub Pages deploy; browser-only data mode on the hosted site (unit tests in `src/local/*.test.ts`, Playwright
+`hosted-local` project, no backend needed).
 
 Not yet verified against real carriers: the USPS and FedEx clients are tested against recorded response shapes only
 (this sandbox could not reach the carrier hosts). Expect small vocabulary adjustments in `status_map.py` after the
@@ -107,6 +115,8 @@ delivered; notes are plain text.
 
 - Scheduled background refresh (was deliberately left manual).
 - Public per-recipient tracking page (tokenized link) if you ever want customers to self-serve.
-- SheetJS in the hosted UI so a plain spreadsheet (not just a snapshot) can be opened on the phone.
+- The browser data mode keeps uncommitted uploads in memory only: reloading during the mapping step means choosing the
+  file again. Persisting the raw file in IndexedDB would fix that.
+- SheetJS is pinned to 0.18.5 from npm (the last version published there); newer releases come from cdn.sheetjs.com.
 - Address parsing for combined street lines (`usaddress`).
 - Merge to `main` and open a PR when ready; the deploy workflow already listens on `main`.

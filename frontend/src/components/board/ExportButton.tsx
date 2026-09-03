@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { dataFilters, filtersToParams, type Filters } from '@/lib/filters'
-import { apiUrl, authHeaders, getToken } from '@/lib/server'
-import { isReadOnly } from '@/api/client'
+import { apiUrl, getToken } from '@/lib/server'
+import { isLocal, isReadOnly, rawFetch } from '@/api/client'
 
 export function ExportButton({ filters }: { filters: Filters }) {
   const [open, setOpen] = useState(false)
@@ -12,15 +12,15 @@ export function ExportButton({ filters }: { filters: Filters }) {
     const p = filtersToParams({ ...dataFilters(filters), sort: filters.sort })
     p.set('format', format)
     setOpen(false)
-    const url = apiUrl(`/api/export?${p.toString()}`)
-    if (!getToken()) {
+    const path = `/api/export?${p.toString()}`
+    if (!getToken() && !isLocal()) {
       // plain navigation: the browser handles the download (same-origin or CORS with Content-Disposition)
-      window.location.href = url
+      window.location.href = apiUrl(path)
       return
     }
-    // With a bearer token the download must go through fetch so the header is sent.
+    // With a bearer token (header needed) or in-browser data (no network), go through fetch.
     void (async () => {
-      const res = await fetch(url, { headers: authHeaders() })
+      const res = await rawFetch(path)
       const blob = await res.blob()
       const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? `shipments.${format}`
       const a = document.createElement('a')
