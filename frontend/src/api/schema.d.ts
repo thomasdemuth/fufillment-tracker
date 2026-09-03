@@ -21,10 +21,481 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Uploads */
+        get: operations["list_uploads_api_uploads_get"];
+        put?: never;
+        /** Create Upload */
+        post: operations["create_upload_api_uploads_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/uploads/{upload_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Upload */
+        get: operations["get_upload_api_uploads__upload_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Upload
+         * @description Delete an upload and the shipments that came only from it. Shipments also present in another
+         *     upload are kept.
+         */
+        delete: operations["delete_upload_api_uploads__upload_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/uploads/{upload_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview Upload */
+        get: operations["preview_upload_api_uploads__upload_id__preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/uploads/{upload_id}/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Commit Upload */
+        post: operations["commit_upload_api_uploads__upload_id__commit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/presets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Presets */
+        get: operations["list_presets_api_presets_get"];
+        put?: never;
+        /** Create Preset */
+        post: operations["create_preset_api_presets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/presets/{preset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Preset */
+        put: operations["update_preset_api_presets__preset_id__put"];
+        post?: never;
+        /** Delete Preset */
+        delete: operations["delete_preset_api_presets__preset_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Shipments */
+        get: operations["list_shipments_api_shipments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shipments/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stats */
+        get: operations["stats_api_shipments_stats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shipments/facets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Facets */
+        get: operations["facets_api_shipments_facets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        /** Body_create_upload_api_uploads_post */
+        Body_create_upload_api_uploads_post: {
+            /**
+             * File
+             * Format: binary
+             */
+            file: string;
+        };
+        /** CommitRequest */
+        CommitRequest: {
+            /** Sheet */
+            sheet?: string | null;
+            /**
+             * Header Row
+             * @default 0
+             */
+            header_row: number;
+            /** Mapping */
+            mapping?: {
+                [key: string]: string;
+            };
+            /**
+             * Geocode Mode
+             * @default offline
+             */
+            geocode_mode: string;
+            /** Default Carrier */
+            default_carrier?: string | null;
+            /** Save Preset As */
+            save_preset_as?: string | null;
+            /** Preset Id */
+            preset_id?: number | null;
+        };
+        /** CommitResult */
+        CommitResult: {
+            upload: components["schemas"]["UploadOut"];
+            /** Imported */
+            imported: number;
+            /** Duplicates */
+            duplicates: number;
+            /** Skipped */
+            skipped: number;
+            /** Errors */
+            errors: {
+                [key: string]: unknown;
+            }[];
+            /** Geocode Job Id */
+            geocode_job_id?: number | null;
+        };
+        /** Facets */
+        Facets: {
+            /** States */
+            states: string[];
+            /** Cities */
+            cities: string[];
+            /** Carriers */
+            carriers: string[];
+            /** Uploads */
+            uploads: {
+                [key: string]: unknown;
+            }[];
+            /** Tags */
+            tags: components["schemas"]["TagOut"][];
+            /** Statuses */
+            statuses: string[];
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /** Page[ShipmentRow] */
+        Page_ShipmentRow_: {
+            /** Items */
+            items: components["schemas"]["ShipmentRow"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
+        /** PresetIn */
+        PresetIn: {
+            /** Name */
+            name: string;
+            /** Mapping */
+            mapping: {
+                [key: string]: string;
+            };
+            /** Headers */
+            headers?: string[] | null;
+        };
+        /** PresetOut */
+        PresetOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Mapping */
+            mapping: {
+                [key: string]: unknown;
+            };
+            /** Header Signature */
+            header_signature: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Last Used At */
+            last_used_at: string | null;
+        };
+        /** ShipmentRow */
+        ShipmentRow: {
+            /** Id */
+            id: number;
+            /** Tracking Number */
+            tracking_number: string;
+            /** Carrier */
+            carrier: string;
+            /** Carrier Confidence */
+            carrier_confidence: number;
+            /** Recipient Name */
+            recipient_name: string | null;
+            /** Company */
+            company: string | null;
+            /** Address1 */
+            address1: string | null;
+            /** Address2 */
+            address2: string | null;
+            /** City */
+            city: string | null;
+            /** State */
+            state: string | null;
+            /** Postal Code */
+            postal_code: string | null;
+            /** Country */
+            country: string;
+            /** Order Ref */
+            order_ref: string | null;
+            /** Ship Date */
+            ship_date: string | null;
+            /** Status */
+            status: string;
+            /** Status Raw */
+            status_raw: string | null;
+            /** Attention Flag */
+            attention_flag: string | null;
+            /** Expected Delivery */
+            expected_delivery: string | null;
+            /** Delivered At */
+            delivered_at: string | null;
+            /** Last Event At */
+            last_event_at: string | null;
+            /** Last Event Desc */
+            last_event_desc: string | null;
+            /** Last Event Place */
+            last_event_place: string | null;
+            /** Dest Lat */
+            dest_lat: number | null;
+            /** Dest Lng */
+            dest_lng: number | null;
+            /** Geocode Precision */
+            geocode_precision: string;
+            /** Last Polled At */
+            last_polled_at: string | null;
+            /** Poll Error Count */
+            poll_error_count: number;
+            /** Poll Last Error */
+            poll_last_error: string | null;
+            /** Days In Transit */
+            days_in_transit?: number | null;
+            /**
+             * Tags
+             * @default []
+             */
+            tags: components["schemas"]["TagOut"][];
+            /**
+             * Upload Ids
+             * @default []
+             */
+            upload_ids: number[];
+            /** Carrier Url */
+            carrier_url?: string | null;
+        };
+        /** Stats */
+        Stats: {
+            /** Total */
+            total: number;
+            /** By Status */
+            by_status: {
+                [key: string]: number;
+            };
+            /** By Carrier */
+            by_carrier: {
+                [key: string]: number;
+            };
+            /** Delivered Last 7D */
+            delivered_last_7d: number;
+            /** Attention */
+            attention: number;
+            /** Avg Days In Transit */
+            avg_days_in_transit: number | null;
+            /** Median Days In Transit */
+            median_days_in_transit: number | null;
+            /** Not Geocoded */
+            not_geocoded: number;
+            /** Last Polled At */
+            last_polled_at: string | null;
+        };
+        /** TagOut */
+        TagOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Color */
+            color: string;
+        };
+        /** UploadOut */
+        UploadOut: {
+            /** Id */
+            id: number;
+            /** Filename */
+            filename: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Committed At */
+            committed_at: string | null;
+            /** Status */
+            status: string;
+            /** Sheet Name */
+            sheet_name: string | null;
+            /** Header Row */
+            header_row: number;
+            /** Column Mapping */
+            column_mapping: {
+                [key: string]: unknown;
+            } | null;
+            /** Preset Id */
+            preset_id: number | null;
+            /** Geocode Mode */
+            geocode_mode: string;
+            /** Default Carrier */
+            default_carrier: string | null;
+            /** Row Count */
+            row_count: number;
+            /** Imported Count */
+            imported_count: number;
+            /** Duplicate Count */
+            duplicate_count: number;
+            /** Skipped Count */
+            skipped_count: number;
+            /** Errors */
+            errors: unknown[] | null;
+            /**
+             * Shipment Count
+             * @default 0
+             */
+            shipment_count: number;
+        };
+        /** UploadPreview */
+        UploadPreview: {
+            /** Upload Id */
+            upload_id: number;
+            /** Filename */
+            filename: string;
+            /** Sheets */
+            sheets: string[];
+            /** Sheet */
+            sheet: string;
+            /** Header Row */
+            header_row: number;
+            /** Headers */
+            headers: string[];
+            /** Sample Rows */
+            sample_rows: string[][];
+            /** Row Count */
+            row_count: number;
+            /** Suggested Mapping */
+            suggested_mapping: {
+                [key: string]: string;
+            };
+            /** Matched Preset Id */
+            matched_preset_id: number | null;
+            /** Fields */
+            fields: {
+                [key: string]: unknown;
+            }[];
+            /** Carrier Detection */
+            carrier_detection: {
+                [key: string]: unknown;
+            };
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -51,6 +522,420 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    list_uploads_api_uploads_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"][];
+                };
+            };
+        };
+    };
+    create_upload_api_uploads_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_create_upload_api_uploads_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_upload_api_uploads__upload_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                upload_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_upload_api_uploads__upload_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                upload_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_upload_api_uploads__upload_id__preview_get: {
+        parameters: {
+            query?: {
+                sheet?: string | null;
+                header_row?: number | null;
+            };
+            header?: never;
+            path: {
+                upload_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    commit_upload_api_uploads__upload_id__commit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                upload_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommitRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommitResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_presets_api_presets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresetOut"][];
+                };
+            };
+        };
+    };
+    create_preset_api_presets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PresetIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresetOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_preset_api_presets__preset_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                preset_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PresetIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresetOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_preset_api_presets__preset_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                preset_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_shipments_api_shipments_get: {
+        parameters: {
+            query?: {
+                sort?: string | null;
+                page?: number;
+                page_size?: number;
+                status?: string[] | null;
+                carrier?: string[] | null;
+                upload_id?: string[] | null;
+                state?: string[] | null;
+                tag?: string[] | null;
+                city?: string | null;
+                q?: string | null;
+                ship_date_from?: string | null;
+                ship_date_to?: string | null;
+                last_event_from?: string | null;
+                last_event_to?: string | null;
+                days_min?: number | null;
+                days_max?: number | null;
+                attention?: boolean | null;
+                geocoded?: boolean | null;
+                ids?: string[] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_ShipmentRow_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stats_api_shipments_stats_get: {
+        parameters: {
+            query?: {
+                status?: string[] | null;
+                carrier?: string[] | null;
+                upload_id?: string[] | null;
+                state?: string[] | null;
+                tag?: string[] | null;
+                city?: string | null;
+                q?: string | null;
+                ship_date_from?: string | null;
+                ship_date_to?: string | null;
+                last_event_from?: string | null;
+                last_event_to?: string | null;
+                days_min?: number | null;
+                days_max?: number | null;
+                attention?: boolean | null;
+                geocoded?: boolean | null;
+                ids?: string[] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Stats"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    facets_api_shipments_facets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Facets"];
                 };
             };
         };
