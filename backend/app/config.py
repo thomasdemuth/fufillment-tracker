@@ -25,11 +25,11 @@ class Settings(BaseSettings):
     map_style_url_dark: str = "https://tiles.openfreemap.org/styles/fiord"
     frontend_dist: Path | None = None
     # Origins allowed to call the API from another site (the Cloudflare-hosted UI). Comma separated.
-    allowed_origins: str = "https://fufillment-tracker.pages.dev,http://localhost:5173"
+    allowed_origins: str = "https://thomasdemuth.github.io,http://localhost:5173,http://localhost:4173"
     # Where this server is reachable from outside the LAN (e.g. a Cloudflare Tunnel hostname). Optional.
     public_url: str | None = None
     # Where the hosted UI lives; used to build phone handoff links. Optional.
-    hosted_ui_url: str | None = "https://fufillment-tracker.pages.dev"
+    hosted_ui_url: str | None = "https://thomasdemuth.github.io/fufillment-tracker"
     port: int = 8000
     log_level: str = "INFO"
 

@@ -62,7 +62,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
-        allow_origin_regex=r"https://[a-z0-9-]+\.fufillment-tracker\.pages\.dev",
+        allow_origin_regex=r"https://[a-z0-9-]+\.github\.io",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { RefreshCw, WifiOff } from 'lucide-react'
 import { useIsDark } from '@/stores/uiStore'
+import { assetUrl } from '@/lib/server'
 
-export const BLANK_STYLE = '/geo/blank-style.json'
-export const BLANK_STYLE_DARK = '/geo/blank-style-dark.json'
+export const BLANK_STYLE = assetUrl('/geo/blank-style.json')
+export const BLANK_STYLE_DARK = assetUrl('/geo/blank-style-dark.json')
 
 export interface BasemapState {
   style: string

@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/uiStore'
 import { Button } from '@/components/ui/button'
 import { CommandPalette } from '@/components/layout/CommandPalette'
+import { SnapshotBanner } from '@/components/layout/SnapshotBanner'
 import { Logo } from '@/components/layout/Logo'
 
 const nav = [
@@ -80,6 +81,7 @@ export function AppShell() {
         </div>
       </aside>
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <SnapshotBanner />
         <Outlet />
       </main>
       <CommandPalette />

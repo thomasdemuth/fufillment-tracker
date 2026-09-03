@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 
 def test_handoff_defaults(client):
     h = client.get("/api/handoff").json()
-    assert h["hosted_ui_url"] == "https://fufillment-tracker.pages.dev"
+    assert h["hosted_ui_url"] == "https://thomasdemuth.github.io/fufillment-tracker"
     assert h["auth_required"] is False
     assert h["public_url"] is None
     client.put(
@@ -18,12 +18,12 @@ def test_handoff_defaults(client):
 def test_cors_allows_hosted_ui(client):
     r = client.options(
         "/api/config",
-        headers={"Origin": "https://fufillment-tracker.pages.dev", "Access-Control-Request-Method": "GET"},
+        headers={"Origin": "https://thomasdemuth.github.io", "Access-Control-Request-Method": "GET"},
     )
     assert r.status_code == 200
-    assert r.headers["access-control-allow-origin"] == "https://fufillment-tracker.pages.dev"
-    r = client.get("/api/config", headers={"Origin": "https://abc123.fufillment-tracker.pages.dev"})
-    assert r.headers.get("access-control-allow-origin") == "https://abc123.fufillment-tracker.pages.dev"
+    assert r.headers["access-control-allow-origin"] == "https://thomasdemuth.github.io"
+    r = client.get("/api/config", headers={"Origin": "https://someone.github.io"})
+    assert r.headers.get("access-control-allow-origin") == "https://someone.github.io"
     r = client.get("/api/config", headers={"Origin": "https://evil.example"})
     assert "access-control-allow-origin" not in r.headers
 
@@ -40,13 +40,13 @@ def test_bearer_auth_and_cross_origin_401(monkeypatch, app_env):
     assert c.get("/api/auth/check", headers={"Authorization": "Bearer hunter2"}).json()["ok"] is True
     assert c.get("/api/auth/check", headers={"Authorization": "Bearer nope"}).status_code == 401
     # cross-origin callers don't get the Basic prompt header; same-origin browsers do
-    r = c.get("/api/auth/check", headers={"Origin": "https://fufillment-tracker.pages.dev"})
+    r = c.get("/api/auth/check", headers={"Origin": "https://thomasdemuth.github.io"})
     assert r.status_code == 401 and "www-authenticate" not in r.headers
     assert "www-authenticate" in c.get("/api/auth/check").headers
     # preflight passes without credentials
     r = c.options(
         "/api/auth/check",
-        headers={"Origin": "https://fufillment-tracker.pages.dev", "Access-Control-Request-Method": "GET"},
+        headers={"Origin": "https://thomasdemuth.github.io", "Access-Control-Request-Method": "GET"},
     )
     assert r.status_code == 200
     config.get_settings.cache_clear()

@@ -13,7 +13,8 @@
     "gen:api": "openapi-typescript http://localhost:8000/openapi.json -o src/api/schema.d.ts",
     "preview": "vite preview",
     "e2e": "playwright test",
-    "build:hosted": "tsc -b && VITE_HOSTED=1 vite build --outDir dist-hosted"
+    "build:hosted": "tsc -b && VITE_HOSTED=1 VITE_BASE=/fufillment-tracker/ vite build --outDir dist-hosted && cp dist-hosted/index.html dist-hosted/404.html",
+    "serve:hosted": "node e2e/serve-hosted.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "5.3.0",
@@ -60,8 +61,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^7.3.6",
-    "vitest": "^3.2.7",
-    "wrangler": "^4.128.0"
+    "vitest": "^3.2.7"
   },
   "packageManager": "pnpm@10.33.0"
 }

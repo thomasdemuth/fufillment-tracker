@@ -16,7 +16,8 @@ function Shell() {
   return mobile ? <MobileShell /> : <AppShell />
 }
 
-export const router = createBrowserRouter([
+export const router = createBrowserRouter(
+  [
   {
     path: '/',
     element: <Shell />,
@@ -33,4 +34,6 @@ export const router = createBrowserRouter([
       { path: '*', element: <Navigate to="/map" replace /> },
     ],
   },
-])
+  ],
+  { basename: import.meta.env.BASE_URL.replace(/\/$/, '') || '/' },
+)

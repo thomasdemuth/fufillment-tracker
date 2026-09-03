@@ -18,6 +18,10 @@ sent, straight to USPS or FedEx, and only when you click Refresh.
 |---|---|---|
 | ![Mobile board](docs/mobile-board.png) | ![Mobile shipment](docs/mobile-shipment.png) | ![Mobile map](docs/mobile-map.png) |
 
+| Phone: open the snapshot from "Send to phone" | Phone: running from the file, no server |
+|---|---|
+| ![Open snapshot](docs/phone-open-snapshot.png) | ![Snapshot shipment](docs/phone-snapshot-shipment.png) |
+
 ## Quick start (Docker)
 
 ```bash
@@ -65,46 +69,30 @@ the drawer.
 
 ## Using it from your phone
 
-Every main screen has a **Send to phone** / copy-link button. It copies a link to exactly what you are looking at
-(a shipment, a filtered board, a map view). Where the link points depends on what you have set up, best first:
+Every main screen has a **Send to phone** button. One click does two things: it downloads a **snapshot file** of
+what you are looking at (the shipments, their tracking history and map positions) and copies a **link** to the hosted
+UI. Send both to your phone however you like (AirDrop, Messages, email). On the phone, open the link, tap "Open a
+snapshot file" and pick the file. The whole app then runs from that file in the phone's browser: board, map, attention,
+and every shipment's progress, path and history. Nothing is uploaded anywhere and no server is involved; the file is
+kept in the phone's browser until you open another one.
 
-| You have | The link opens |
-|---|---|
-| `PUBLIC_URL` set (a Cloudflare Tunnel or any HTTPS address for your server) | the hosted UI at `HOSTED_UI_URL` with `?server=<your server>` so it connects with one tap, from anywhere |
-| only the default install | `http://<your LAN IP>:8000/...`, which works on the same Wi-Fi |
+The snapshot is read-only (no refresh, no edits). To update, click Send to phone again and open the new file.
 
-If `APP_PASSWORD` is set, the phone asks for it once and remembers it in that browser. Below 768px the app switches to
-a phone layout: bottom tabs, a card list with a filter sheet, a full-screen shipment page with a sticky carrier
-button, and a full-bleed map with a bottom sheet.
+If you have a public HTTPS address for your server (`PUBLIC_URL`, e.g. a Cloudflare Tunnel), the link instead connects
+the hosted UI to your live server and no file is needed. On home Wi-Fi you can always open the server's own LAN
+address directly.
 
-### Hosting the UI on Cloudflare Pages (no data leaves your machine)
+Below 768px the app switches to a phone layout: bottom tabs, a card list with a filter sheet, a full-screen shipment
+page with a sticky carrier button, and a full-bleed map with a bottom sheet.
 
-The frontend can be served from Cloudflare Pages as a pure static site. It holds **no data**: on first open it asks for
-your server's address (or gets it from a handoff link) and talks to your self-hosted backend directly from the browser.
-The backend only needs to allow that origin (`ALLOWED_ORIGINS`, preset for `fufillment-tracker.pages.dev`).
+### Hosting the UI on GitHub Pages (no data leaves your machine)
 
-Auto-deploy is wired up in `.github/workflows/deploy-pages.yml`. To turn it on:
+The interface is a static site and is published to GitHub Pages by `.github/workflows/deploy-github-pages.yml` on
+every push. It holds **no data**: it only ever shows a snapshot file you opened, or talks to a server you point it at.
 
-1. In Cloudflare, create an API token with the **Cloudflare Pages: Edit** permission and note your **Account ID**.
-2. In GitHub: **Settings → Secrets and variables → Actions**, add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-3. Push (or run the workflow manually). The first run creates a Pages project named after the repository
-   (`fufillment-tracker`) and every later push to `main`/`master`/the feature branch redeploys.
-
-Your UI is then at `https://fufillment-tracker.pages.dev`. Browsers block an `https://` page from calling an
-`http://` LAN address, so for the hosted UI to reach your server it needs an HTTPS address:
-
-**Cloudflare Tunnel (recommended, free):**
-
-```bash
-cloudflared tunnel login
-cloudflared tunnel create tracker
-cloudflared tunnel route dns tracker tracker.example.com      # any hostname on a domain you have in Cloudflare
-cloudflared tunnel run --url http://localhost:8000 tracker
-```
-
-Then set in `.env`: `PUBLIC_URL=https://tracker.example.com` and `APP_PASSWORD=...` (or protect the hostname with
-Cloudflare Access). Restart, click **Send to phone**, and the link opens the hosted UI already connected to your
-server. Only you decide who reaches the tunnel; the data still lives on your machine.
+One-time setup: in the repository, **Settings → Pages → Build and deployment → Source: GitHub Actions**. The next push
+(or a manual run of the workflow) publishes the site at `https://<your-github-user>.github.io/fufillment-tracker/`.
+That address is the default `HOSTED_UI_URL`; change it in `.env` or **Settings → General** if your user name differs.
 
 ## Uploading spreadsheets
 
@@ -213,8 +201,8 @@ All options live in `.env` (see `.env.example`):
 | `MAP_STYLE_URL` | OpenFreeMap positron | MapLibre style URL for the light basemap |
 | `MAP_STYLE_URL_DARK` | OpenFreeMap fiord | MapLibre style URL for the dark basemap |
 | `PUBLIC_URL` | unset | HTTPS address of this server from outside the LAN (tunnel), used by Send to phone |
-| `HOSTED_UI_URL` | `https://fufillment-tracker.pages.dev` | Where the hosted UI lives; handoff links open it |
-| `ALLOWED_ORIGINS` | the Pages domain + localhost:5173 | Browser origins allowed to call the API |
+| `HOSTED_UI_URL` | `https://thomasdemuth.github.io/fufillment-tracker` | Where the hosted UI lives; handoff links open it |
+| `ALLOWED_ORIGINS` | `https://thomasdemuth.github.io`, localhost | Browser origins allowed to call the API (hosted UI with a live server) |
 
 ## Development
 
@@ -232,7 +220,8 @@ make seed            # regenerate ./demo spreadsheets
 make demo            # upload ./demo files to a running server and refresh with mock carriers
 make gen-api         # regenerate frontend/src/api/schema.d.ts from the running backend's OpenAPI
 make e2e             # Playwright smoke test (desktop + phone viewport) against a running server on :8000
-pnpm build:hosted    # (in frontend/) build the Cloudflare Pages variant into dist-hosted/
+pnpm build:hosted    # (in frontend/) build the GitHub Pages variant into dist-hosted/ (served under /fufillment-tracker/)
+pnpm serve:hosted    # (in frontend/) serve dist-hosted locally the way GitHub Pages does, on :4173
 make docker-build    # build the production image
 ```
 
@@ -257,6 +246,8 @@ API docs are served at http://localhost:8000/api/docs.
   and attention endpoints, and they live in the URL on the frontend so views stay in sync and links are shareable.
 - **Every outbound HTTP request** goes through `backend/app/http.py`, which records host + purpose + data class (never
   payloads) for the Privacy page.
+- **Snapshot mode.** `frontend/src/api/localServer.ts` re-implements the read-only API in the browser over a snapshot
+  file (`GET /api/snapshot` on the backend), so the same pages run with no server on GitHub Pages.
 
 ## Assumptions
 

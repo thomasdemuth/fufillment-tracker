@@ -4,6 +4,7 @@ import { FileSpreadsheet, Trash2, Upload } from 'lucide-react'
 import { useDeleteUpload, useUploads } from '@/api/queries'
 import { PageHeader } from '@/components/layout/AppShell'
 import { Button } from '@/components/ui/button'
+import { isReadOnly } from '@/api/client'
 import { Card } from '@/components/ui/card'
 import { fmtBytes, fmtDate, fmtRelative } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -26,9 +27,11 @@ export function UploadsPage() {
   return (
     <>
       <PageHeader title="Uploads" subtitle="Each spreadsheet you import. Duplicate tracking numbers across files are merged.">
+        {!isReadOnly() && (
         <Button size="sm" onClick={() => navigate('/uploads/new')}>
           <Upload className="h-3.5 w-3.5" /> Upload spreadsheet
         </Button>
+        )}
       </PageHeader>
       <div className="flex-1 overflow-auto p-4">
         {uploads.data?.length === 0 && (

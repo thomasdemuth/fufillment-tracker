@@ -8,6 +8,7 @@ import { ShareButton } from '@/components/layout/ShareButton'
 import { Button } from '@/components/ui/button'
 import { ShipmentDetailBody } from '@/components/shipment/ShipmentDetailBody'
 import { useIsMobile } from '@/lib/useIsMobile'
+import { isReadOnly } from '@/api/client'
 
 export function ShipmentPage() {
   const { id } = useParams()
@@ -36,6 +37,7 @@ export function ShipmentPage() {
         </div>
         {s && (
           <div className="fixed inset-x-0 bottom-[54px] z-20 flex gap-2 border-t border-border bg-panel/95 px-3 py-2 backdrop-blur" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
+            {!isReadOnly() && (
             <Button
               variant="outline"
               className="h-11 flex-1"
@@ -51,6 +53,7 @@ export function ShipmentPage() {
             >
               <RefreshCw className={`h-4 w-4 ${refresh.isPending ? 'animate-spin' : ''}`} /> Refresh
             </Button>
+            )}
             {s.carrier_url && (
               <Button className="h-11 flex-1" onClick={() => window.open(s.carrier_url!, '_blank', 'noopener')}>
                 <ExternalLink className="h-4 w-4" /> Open on {s.carrier === 'usps' ? 'USPS' : 'FedEx'}

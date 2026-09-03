@@ -1,6 +1,8 @@
 import createClient, { type Middleware } from 'openapi-fetch'
 import type { paths } from './schema'
 import { authHeaders, getServerUrl } from '@/lib/server'
+import { getSnapshot } from '@/lib/snapshot'
+import { snapshotFetch } from '@/api/localServer'
 
 export class ApiError extends Error {
   status: number
@@ -25,9 +27,16 @@ const middleware: Middleware = {
 }
 
 function makeClient() {
-  const c = createClient<paths>({ baseUrl: getServerUrl() || '/', credentials: getServerUrl() ? 'omit' : 'same-origin' })
+  const snap = getSnapshot()
+  const c = snap
+    ? createClient<paths>({ baseUrl: window.location.origin, fetch: snapshotFetch(snap) })
+    : createClient<paths>({ baseUrl: getServerUrl() || '/', credentials: getServerUrl() ? 'omit' : 'same-origin' })
   c.use(middleware)
   return c
+}
+
+export function isReadOnly(): boolean {
+  return getSnapshot() != null
 }
 
 let _api = makeClient()

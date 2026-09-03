@@ -26,6 +26,14 @@ for (const spec of specs) {
       await page.waitForTimeout(300)
     }
     if (o.startsWith('type=')) await page.keyboard.type(o.slice(5))
+    if (o.startsWith('file=')) {
+      await page.locator('input[type=file]').first().setInputFiles(o.slice(5))
+      await page.waitForTimeout(800)
+    }
+    if (o.startsWith('goto=')) {
+      await page.goto(base + o.slice(5), { waitUntil: 'networkidle' })
+      await page.waitForTimeout(500)
+    }
     if (o.startsWith('wait=')) await page.waitForTimeout(Number(o.slice(5)))
   }
   await page.waitForTimeout(1200)

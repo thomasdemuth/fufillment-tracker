@@ -13,6 +13,7 @@ import { MapLegend } from '@/components/map/MapLegend'
 import { MapModeToggle } from '@/components/map/MapModeToggle'
 import { MapView } from '@/components/map/MapView'
 import { Button } from '@/components/ui/button'
+import { isReadOnly } from '@/api/client'
 import { RefreshButton } from '@/components/shipment/RefreshButton'
 import { ShipmentDrawer } from '@/components/shipment/ShipmentDrawer'
 import { dataFilters, filtersToParams } from '@/lib/filters'
@@ -115,9 +116,11 @@ export function MapPage() {
         <Button variant="outline" size="sm" onClick={() => navigate(`/board?${filtersToParams(df)}`)}>
           <LayoutList className="h-3.5 w-3.5" /> Board view
         </Button>
+        {!isReadOnly() && (
         <Button variant="outline" size="sm" onClick={() => navigate('/uploads/new')}>
           <Upload className="h-3.5 w-3.5" /> Upload
         </Button>
+        )}
       </PageHeader>
       <div className="border-b border-border bg-panel px-4 py-2">
         <FilterBar filters={filters} setFilters={setFilters} reset={reset} facets={facets.data} compact />

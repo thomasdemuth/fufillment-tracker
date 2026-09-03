@@ -13,6 +13,7 @@ import { NotesPanel } from '@/components/shipment/NotesPanel'
 import { TagPicker } from '@/components/shipment/TagPicker'
 import { fmtDate, fmtDays } from '@/lib/format'
 import { useIsDark } from '@/stores/uiStore'
+import { isReadOnly } from '@/api/client'
 
 export function ShipmentDetailBody({ s, onDeleted, mobile = false }: { s: ShipmentDetail; onDeleted?: () => void; mobile?: boolean }) {
   const config = useConfig()
@@ -22,6 +23,7 @@ export function ShipmentDetailBody({ s, onDeleted, mobile = false }: { s: Shipme
   const patch = usePatchShipment()
   const del = useDeleteShipment()
   const [editing, setEditing] = useState(false)
+  const readOnly = isReadOnly()
 
   const onRefresh = async () => {
     try {
@@ -46,9 +48,11 @@ export function ShipmentDetailBody({ s, onDeleted, mobile = false }: { s: Shipme
         actions={
           mobile ? null : (
           <>
+            {!readOnly && (
             <Button size="sm" variant="outline" onClick={onRefresh} disabled={refresh.isPending}>
               <RefreshCw className={`h-3.5 w-3.5 ${refresh.isPending ? 'animate-spin' : ''}`} /> Refresh
             </Button>
+            )}
             {s.carrier_url && (
               <Button size="sm" onClick={() => window.open(s.carrier_url!, '_blank', 'noopener')}>
                 <ExternalLink className="h-3.5 w-3.5" /> {s.carrier === 'usps' ? 'USPS' : 'FedEx'}
@@ -76,9 +80,11 @@ export function ShipmentDetailBody({ s, onDeleted, mobile = false }: { s: Shipme
       <section>
         <div className="mb-1.5 flex items-center justify-between">
           <SectionLabel>Recipient</SectionLabel>
+          {!readOnly && (
           <Button variant="ghost" size="sm" onClick={() => setEditing((e) => !e)}>
             <Pencil className="h-3.5 w-3.5" /> {editing ? 'Cancel' : 'Edit'}
           </Button>
+          )}
         </div>
         {editing ? (
           <EditForm s={s} onSave={async (body) => {
@@ -111,7 +117,7 @@ export function ShipmentDetailBody({ s, onDeleted, mobile = false }: { s: Shipme
         )}
       </section>
 
-      <TagPicker shipment={s} />
+      {readOnly ? (s.tags.length > 0 && <div className="flex flex-wrap gap-1.5">{s.tags.map((t) => <span key={t.id} className="rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: `${t.color}22`, color: t.color }}>{t.name}</span>)}</div>) : <TagPicker shipment={s} />}
 
       {/* map */}
       <section>
@@ -127,15 +133,17 @@ export function ShipmentDetailBody({ s, onDeleted, mobile = false }: { s: Shipme
         <Timeline events={s.events} />
       </section>
 
-      <NotesPanel shipment={s} />
+      {readOnly ? (s.notes.length > 0 && <section><SectionLabel className="mb-2">Notes</SectionLabel>{s.notes.map((n) => <div key={n.id} className="mb-2 rounded-control border border-border bg-panel-2/50 px-3 py-2 text-sm whitespace-pre-wrap">{n.body}</div>)}</section>) : <NotesPanel shipment={s} />}
 
       <section className="flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted">
         <div>
           From {s.uploads.map((u) => `${u.filename} (row ${u.row_number})`).join(', ') || 'manual entry'}
         </div>
+        {!readOnly && (
         <Button variant="ghost" size="sm" className="text-muted hover:text-danger" onClick={onDelete}>
           <Trash2 className="h-3.5 w-3.5" /> Delete
         </Button>
+        )}
       </section>
     </div>
   )

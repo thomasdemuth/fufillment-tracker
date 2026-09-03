@@ -17,5 +17,6 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { viewport: { width: 1400, height: 900 } }, testMatch: /smoke\.spec\.ts/ },
     { name: 'mobile', dependencies: ['desktop'], use: { ...devices['iPhone 13'], browserName: 'chromium', launchOptions }, testMatch: /mobile\.spec\.ts/ },
+    { name: 'hosted', dependencies: ['desktop'], use: { ...devices['iPhone 13'], browserName: 'chromium', launchOptions }, testMatch: /hosted\.spec\.ts/ },
   ],
 })

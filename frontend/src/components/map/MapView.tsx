@@ -20,6 +20,7 @@ import {
 import { StatusBadge } from '@/components/ui/status-badge'
 import { useIsDark, type MapMode } from '@/stores/uiStore'
 import { BasemapBanner, useBasemap } from '@/components/map/useBasemap'
+import { assetUrl } from '@/lib/server'
 
 const US_BOUNDS: [[number, number], [number, number]] = [[-125, 24], [-66, 50]]
 const EMPTY: PointCollection = { type: 'FeatureCollection', features: [] }
@@ -158,7 +159,7 @@ export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick
       <NavigationControl position={controlsPosition} showCompass={false} />
       <ScaleControl position="bottom-left" unit="imperial" />
 
-      <Source id={SRC_STATES} type="geojson" data="/geo/us-states.geojson" promoteId="postal">
+      <Source id={SRC_STATES} type="geojson" data={assetUrl('/geo/us-states.geojson')} promoteId="postal">
         <Layer {...stateFillLayer(p)} layout={{ visibility: mode === 'states' ? 'visible' : 'none' }} />
         <Layer {...stateLineLayer(p)} layout={{ visibility: mode === 'states' ? 'visible' : 'none' }} />
         <Layer {...stateLabelLayer(p)} layout={{ ...stateLabelLayer(p).layout, visibility: mode === 'states' ? 'visible' : 'none' }} />

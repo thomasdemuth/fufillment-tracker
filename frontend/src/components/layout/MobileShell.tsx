@@ -4,6 +4,7 @@ import { AlertTriangle, LayoutList, Map, MoreHorizontal, Settings, ShieldCheck, 
 import { Logo } from '@/components/layout/Logo'
 import { ThemeToggle } from '@/components/layout/AppShell'
 import { CommandPalette } from '@/components/layout/CommandPalette'
+import { SnapshotBanner } from '@/components/layout/SnapshotBanner'
 import { ShareButton } from '@/components/layout/ShareButton'
 import { Sheet } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
@@ -22,6 +23,7 @@ export function MobileShell() {
   return (
     <div className="flex h-full flex-col bg-bg">
       <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <SnapshotBanner />
         <Outlet />
       </main>
       <nav className="shrink-0 border-t border-border bg-panel" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>

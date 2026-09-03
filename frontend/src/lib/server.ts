@@ -56,6 +56,15 @@ export function getServerUrl(): string {
   return read(KEY_BASE) ?? (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 }
 
+export type DataMode = 'server' | 'snapshot'
+const KEY_MODE = 'ft.mode'
+export function getDataMode(): DataMode {
+  return read(KEY_MODE) === 'snapshot' ? 'snapshot' : 'server'
+}
+export function setDataMode(m: DataMode) {
+  write(KEY_MODE, m === 'snapshot' ? 'snapshot' : null)
+}
+
 export function setServerUrl(v: string | null) {
   write(KEY_BASE, v ? normalizeServerUrl(v) : null)
 }
@@ -79,7 +88,8 @@ export function authHeaders(): Record<string, string> {
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
 
-/** Static asset path (geo files, blank styles) always comes from the UI's own origin. */
+/** Static asset path (geo files, blank styles) always comes from the UI's own origin, under the build's base path. */
 export function assetUrl(path: string): string {
-  return path
+  const base = import.meta.env.BASE_URL || '/'
+  return `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
 }

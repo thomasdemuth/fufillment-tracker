@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { RefreshCw } from 'lucide-react'
 import { useJob, useStartRefresh, useInvalidateAll } from '@/api/queries'
+import { isReadOnly } from '@/api/client'
 import { Button } from '@/components/ui/button'
 import { dataFilters, type Filters } from '@/lib/filters'
 import { cn } from '@/lib/utils'
 
 /** Header button: refresh active shipments (respecting the current filters) with live job progress. */
 export function RefreshButton({ filters }: { filters: Filters }) {
+  const readOnly = isReadOnly()
   const start = useStartRefresh()
   const [jobId, setJobId] = useState<number | null>(() => {
     try {
@@ -64,6 +66,7 @@ export function RefreshButton({ filters }: { filters: Filters }) {
 
   const hasFilters = Object.values(dataFilters(filters)).some((v) => (Array.isArray(v) ? v.length > 0 : v !== undefined && v !== ''))
   const pct = job.data && job.data.total > 0 ? Math.round((job.data.done / job.data.total) * 100) : 0
+  if (readOnly) return null
 
   return (
     <div className="relative">

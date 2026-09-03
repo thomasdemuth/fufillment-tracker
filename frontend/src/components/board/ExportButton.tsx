@@ -3,9 +3,11 @@ import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { dataFilters, filtersToParams, type Filters } from '@/lib/filters'
 import { apiUrl, authHeaders, getToken } from '@/lib/server'
+import { isReadOnly } from '@/api/client'
 
 export function ExportButton({ filters }: { filters: Filters }) {
   const [open, setOpen] = useState(false)
+  const readOnly = isReadOnly()
   const go = (format: 'csv' | 'xlsx') => {
     const p = filtersToParams({ ...dataFilters(filters), sort: filters.sort })
     p.set('format', format)
@@ -28,6 +30,7 @@ export function ExportButton({ filters }: { filters: Filters }) {
       setTimeout(() => URL.revokeObjectURL(a.href), 5000)
     })()
   }
+  if (readOnly) return null
   return (
     <div className="relative">
       <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
