@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { CheckCircle2, ExternalLink, XCircle } from 'lucide-react'
+import { BookOpen, CheckCircle2, ExternalLink, XCircle } from 'lucide-react'
 import {
   useCarrierSettings,
   useGeneralSettings,
@@ -19,7 +20,7 @@ import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Label, Select } from '@/components/ui/input'
 import { fmtRelative } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { isLocal } from '@/api/client'
+import { isLocal, rawFetch } from '@/api/client'
 
 type Tab = 'carriers' | 'geocoding' | 'general'
 
@@ -69,15 +70,7 @@ function LocalNotice({ children }: { children: React.ReactNode }) {
 
 function CarriersTab() {
   const q = useCarrierSettings()
-  if (isLocal()) {
-    return (
-      <div className="flex flex-col gap-4">
-        <LocalNotice>
-          Your data is kept in this browser, which has no server to call USPS or FedEx. Refresh uses the built-in <span className="font-medium text-text">mock</span> carrier (fake but realistic statuses). For live tracking with your own free developer credentials, run the app on your computer; see the README.
-        </LocalNotice>
-      </div>
-    )
-  }
+  if (isLocal()) return <RelayTab />
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted">
@@ -188,6 +181,161 @@ function CarrierCard({ c }: { c: CarrierSettings }) {
         </div>
       </CardBody>
     </Card>
+  )
+}
+
+const GUIDE_URL = 'https://github.com/thomasdemuth/fufillment-tracker/blob/HEAD/docs/LIVE-TRACKING.md'
+
+type RelayCheck = { at: string; ok: boolean; message: string; carriers: Record<'usps' | 'fedex', { configured: boolean; sandbox: boolean; ok?: boolean; message?: string }> }
+type RelaySettings = { relay_url: string | null; has_token: boolean; token_masked: string | null; relay_check: RelayCheck | null }
+
+async function relayJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const r = await rawFetch(path, init)
+  const j = (await r.json()) as T & { detail?: string }
+  if (!r.ok) throw new Error(j.detail ?? `Request failed (${r.status})`)
+  return j
+}
+
+/** Browser data mode: live tracking goes through the user's own relay Worker; credentials never live on the site. */
+function RelayTab() {
+  const qc = useQueryClient()
+  const q = useQuery({ queryKey: ['settings', 'relay'], queryFn: () => relayJson<RelaySettings>('/api/settings/relay') })
+  const [url, setUrl] = useState('')
+  const [token, setToken] = useState('')
+  useEffect(() => {
+    if (q.data) setUrl(q.data.relay_url ?? '')
+  }, [q.data])
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['settings'] })
+    qc.invalidateQueries({ queryKey: ['config'] })
+    qc.invalidateQueries({ queryKey: ['health'] })
+    qc.invalidateQueries({ queryKey: ['privacy'] })
+  }
+  const save = useMutation({
+    mutationFn: async () => relayJson<RelaySettings>('/api/settings/relay', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ relay_url: url, ...(token ? { relay_token: token } : {}) }) }),
+    onSuccess: () => {
+      setToken('')
+      invalidate()
+    },
+  })
+  const test = useMutation({
+    mutationFn: async () => {
+      // Save first so the test uses what is on screen.
+      await relayJson<RelaySettings>('/api/settings/relay', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ relay_url: url, ...(token ? { relay_token: token } : {}) }) })
+      setToken('')
+      return relayJson<RelayCheck>('/api/settings/relay/test', { method: 'POST' })
+    },
+    onSettled: invalidate,
+  })
+  const onSave = async () => {
+    try {
+      await save.mutateAsync()
+      toast.success(url ? 'Relay saved' : 'Relay removed; using the mock carrier')
+    } catch (e) {
+      toast.error((e as Error).message)
+    }
+  }
+  const onTest = async () => {
+    try {
+      const r = await test.mutateAsync()
+      r.ok ? toast.success(r.message) : toast.error(r.message)
+    } catch (e) {
+      toast.error((e as Error).message)
+    }
+  }
+  const check = q.data?.relay_check
+  const configured = !!q.data?.relay_url && !!q.data?.has_token
+  const dirty = url !== (q.data?.relay_url ?? '') || token !== ''
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-muted">
+        Your data lives in this browser, and browsers cannot call USPS or FedEx directly. Live status comes through a small <span className="font-medium text-text">relay</span> you deploy for free on Cloudflare: it holds your carrier keys, and the site sends it tracking numbers only. Without a relay, Refresh uses the built-in mock carrier.
+      </p>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <CardTitle>Live tracking relay</CardTitle>
+            <StatusPill status={!configured ? 'mock' : !check ? 'unconfigured' : check.ok ? 'ok' : 'error'} />
+          </div>
+          <a href={GUIDE_URL} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-xs text-accent hover:underline">
+            <BookOpen className="h-3 w-3" /> Step-by-step guide: USPS and FedEx keys, deploying the relay
+          </a>
+        </CardHeader>
+        <CardBody className="flex flex-col gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1">
+              <Label>Relay address (your Worker URL)</Label>
+              <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://fulfillment-tracker-relay.you.workers.dev" autoCapitalize="none" autoCorrect="off" inputMode="url" />
+            </label>
+            <label className="flex flex-col gap-1">
+              <Label>Relay token (the RELAY_TOKEN secret)</Label>
+              <Input type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder={q.data?.has_token ? `saved (${q.data.token_masked})` : 'paste token'} autoComplete="new-password" />
+            </label>
+          </div>
+          {check && (
+            <div className="rounded-control border border-border bg-panel-2/50 px-3 py-2 text-xs">
+              <div className="mb-1 flex items-center gap-1 font-medium">
+                {check.ok ? <CheckCircle2 className="h-3.5 w-3.5 text-status-delivered" /> : <XCircle className="h-3.5 w-3.5 text-danger" />}
+                {check.message} · tested {fmtRelative(check.at)}
+              </div>
+              {(['usps', 'fedex'] as const).map((c) => {
+                const info = check.carriers[c]
+                return (
+                  <div key={c} className="flex items-center gap-2 py-0.5">
+                    <span className="w-12 font-medium">{CARRIER_INFO[c].label}</span>
+                    {info.configured ? (info.ok ? <CheckCircle2 className="h-3.5 w-3.5 text-status-delivered" /> : <XCircle className="h-3.5 w-3.5 text-danger" />) : <span className="h-3.5 w-3.5 rounded-full border border-border" />}
+                    <span className="text-muted">
+                      {info.message ?? (info.configured ? 'configured' : 'no keys on the relay')}
+                      {info.sandbox ? ' · test environment' : ''}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-xs text-muted">{configured ? 'Refresh fetches live status through this relay. Only tracking numbers are sent.' : 'Not connected: Refresh uses the mock carrier.'}</div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={onTest} disabled={test.isPending || !url || (!token && !q.data?.has_token)}>
+                {test.isPending ? 'Testing…' : 'Test'}
+              </Button>
+              <Button size="sm" onClick={onSave} disabled={!dirty || save.isPending}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Where the keys go</CardTitle>
+        </CardHeader>
+        <CardBody className="text-sm text-muted">
+          <ol className="list-decimal space-y-1 pl-5">
+            <li>
+              Get a free Consumer Key/Secret at{' '}
+              <a href={CARRIER_INFO.usps.url} target="_blank" rel="noreferrer noopener" className="text-accent hover:underline">
+                developers.usps.com
+              </a>{' '}
+              (add the Tracking API to an app) and an API Key/Secret Key at{' '}
+              <a href={CARRIER_INFO.fedex.url} target="_blank" rel="noreferrer noopener" className="text-accent hover:underline">
+                developer.fedex.com
+              </a>{' '}
+              (a project with the Track API).
+            </li>
+            <li>Deploy the relay Worker on Cloudflare (dashboard paste or one wrangler command) and store the keys plus a RELAY_TOKEN of your choosing as its secrets.</li>
+            <li>Paste the Worker address and the token above, click Test, then Save. The keys never touch this site.</li>
+          </ol>
+          <p className="mt-2">
+            The guide covers every click, including USPS production approval and FedEx sandbox versus production keys.{' '}
+            <a href={GUIDE_URL} target="_blank" rel="noreferrer noopener" className="text-accent hover:underline">
+              Open the guide
+            </a>
+            .
+          </p>
+        </CardBody>
+      </Card>
+    </div>
   )
 }
 

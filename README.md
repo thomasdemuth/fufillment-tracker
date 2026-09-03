@@ -102,9 +102,13 @@ only in that browser: it is never sent to GitHub, to a server, or anywhere else.
 has nowhere to send anything. Clearing the site's data in the browser (or the wipe button on the Privacy page)
 deletes it all; **Send to phone** downloads a snapshot file you can keep as a backup or open on another device.
 
-Two things need a computer running the app rather than the browser alone: live USPS/FedEx tracking (the browser has
-no server to call the carriers, so Refresh uses the built-in mock carrier) and street-level geocoding (the browser
-places shipments by ZIP code, which is enough for the map, heatmap and by-state views).
+**Live USPS/FedEx status on the hosted site** needs a small relay, because browsers cannot call the carrier APIs
+directly and API secrets must not live in a public website. The relay is a Cloudflare Worker (`worker/`, free plan)
+that holds your carrier keys; the site sends it tracking numbers only. The guide
+[docs/LIVE-TRACKING.md](docs/LIVE-TRACKING.md) walks through getting USPS and FedEx credentials, deploying the
+Worker (dashboard or terminal), and connecting it under **Settings → Carriers**. Until a relay is configured, Refresh
+uses the built-in mock carrier. Street-level geocoding also stays a desktop-app feature: the browser places shipments
+by ZIP code, which is enough for the map, heatmap and by-state views.
 
 One-time setup: in the repository, **Settings → Pages → Build and deployment → Source: GitHub Actions**. The next push
 (or a manual run of the workflow) publishes the site at `https://<your-github-user>.github.io/fufillment-tracker/`.
@@ -229,6 +233,7 @@ All options live in `.env` (see `.env.example`):
 ```
 backend/    FastAPI + SQLAlchemy + SQLite (uv, ruff, pytest)
 frontend/   React 19 + TypeScript + Vite + Tailwind 4 + MapLibre GL (pnpm, vitest, playwright)
+worker/     Cloudflare Worker relaying USPS/FedEx lookups for the hosted site (plain JS, no build)
 demo/       generated sample spreadsheets (fake data)
 ```
 

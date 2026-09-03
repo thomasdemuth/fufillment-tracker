@@ -1,0 +1,16 @@
+# Cloudflare Worker that relays tracking lookups to USPS and FedEx for the hosted UI.
+# Deploy:   npx wrangler deploy            (from this folder; `npx wrangler login` first)
+# Secrets:  npx wrangler secret put RELAY_TOKEN
+#           npx wrangler secret put USPS_CLIENT_ID / USPS_CLIENT_SECRET
+#           npx wrangler secret put FEDEX_API_KEY / FEDEX_SECRET_KEY
+# See docs/LIVE-TRACKING.md for the full walkthrough (including the no-terminal dashboard route).
+name = "fulfillment-tracker-relay"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+[vars]
+# Comma-separated browser origins allowed to call this relay. "*" allows any site (the token still protects it).
+ALLOWED_ORIGINS = "*"
+# Set to "true" to use the carriers' test environments (USPS TEM, FedEx sandbox).
+USPS_SANDBOX = "false"
+FEDEX_SANDBOX = "false"

@@ -129,7 +129,7 @@ export function UploadWizardPage() {
             )}
             <p className="mt-4 text-sm text-muted">
               {isLocal()
-                ? 'Click Refresh on the board to fill in statuses. In this browser they come from the built-in mock carrier (fake but realistic); live USPS/FedEx tracking needs the app on your own computer.'
+                ? 'Click Refresh on the board to fill in statuses. For live USPS/FedEx status, connect your tracking relay under Settings → Carriers; until then the built-in mock carrier supplies fake but realistic statuses.'
                 : 'Statuses are fetched when you click Refresh on the board (only tracking numbers are sent to the carrier).'}
             </p>
             <div className="mt-5 flex justify-center gap-2">

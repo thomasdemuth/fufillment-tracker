@@ -57,7 +57,10 @@ Key design points:
   - `local`: the user's own data in IndexedDB, read-write, no server. `frontend/src/local/` ports the backend
     (spreadsheet reading via SheetJS, mapping, importer, offline ZIP geocoding from `public/geo/us_zips.txt`, mock
     carrier, jobs, notes/tags, export, snapshot export); `local/server.ts` answers the same `/api/...` paths, so the
-    pages are unchanged. Live carriers and online geocoding are not available here (Settings explains why).
+    pages are unchanged. Live carriers work through the user's own relay Worker (`worker/src/index.js`, deployed on
+    Cloudflare; `local/liveCarriers.ts` parses USPS/FedEx responses with the backend's status tables, tested on the
+    same fixtures). Settings → Carriers holds the relay URL + token; `docs/LIVE-TRACKING.md` is the user guide.
+    Online geocoding is not available here.
   - `server`: a user-run backend over CORS with a bearer token.
   Regenerate the demo file only with `make demo-snapshot` (throwaway database seeded from `demo/`), never from a real
   database: `.gitignore` blocks `*.snapshot.json` and spreadsheets outside `demo/` and test fixtures, and
