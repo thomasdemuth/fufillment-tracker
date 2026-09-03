@@ -2,6 +2,10 @@ import { useNavigate } from 'react-router'
 import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { useAttention, useConfig, useFacets, type AttentionRow } from '@/api/queries'
 import { PageHeader } from '@/components/layout/AppShell'
+import { MobileHeader } from '@/components/layout/MobileShell'
+import { ShareButton } from '@/components/layout/ShareButton'
+import { MobileFilters } from '@/components/filters/FilterSheet'
+import { useIsMobile } from '@/lib/useIsMobile'
 import { FilterBar } from '@/components/filters/FilterBar'
 import { ExportButton } from '@/components/board/ExportButton'
 import { RefreshButton } from '@/components/shipment/RefreshButton'
@@ -27,9 +31,10 @@ export function AttentionPage() {
   const q = useAttention(dataFilters(filters))
   const facets = useFacets()
   const config = useConfig()
+  const mobile = useIsMobile()
   const selected = params.get('shipment') ? Number(params.get('shipment')) : null
   const open = (id: number | null) =>
-    setParams(
+    mobile && id ? navigate(`/shipments/${id}`) : setParams(
       (prev) => {
         const p = new URLSearchParams(prev)
         if (id) p.set('shipment', String(id))
@@ -44,14 +49,26 @@ export function AttentionPage() {
 
   return (
     <>
-      <PageHeader title="Needs attention" subtitle={`Exceptions, returns, pickups, and shipments with no scans for ${config.data?.stuck_days ?? 7}+ days`}>
-        <ExportButton filters={{ ...filters, attention: true }} />
-        <RefreshButton filters={filters} />
-      </PageHeader>
-      <div className="border-b border-border bg-panel px-4 py-2">
-        <FilterBar filters={filters} setFilters={setFilters} reset={reset} facets={facets.data} compact />
-      </div>
-      <div className="flex-1 overflow-auto p-4">
+      {mobile ? (
+        <>
+          <MobileHeader title="Needs attention" subtitle={`${rows.length} to look at`}>
+            <RefreshButton filters={filters} />
+          </MobileHeader>
+          <MobileFilters filters={filters} setFilters={setFilters} reset={reset} facets={facets.data} />
+        </>
+      ) : (
+        <>
+          <PageHeader title="Needs attention" subtitle={`Exceptions, returns, pickups, and shipments with no scans for ${config.data?.stuck_days ?? 7}+ days`}>
+            <ShareButton />
+            <ExportButton filters={{ ...filters, attention: true }} />
+            <RefreshButton filters={filters} />
+          </PageHeader>
+          <div className="border-b border-border bg-panel px-4 py-2">
+            <FilterBar filters={filters} setFilters={setFilters} reset={reset} facets={facets.data} compact />
+          </div>
+        </>
+      )}
+      <div className={`flex-1 overflow-auto ${mobile ? "p-3" : "p-4"}`}>
         {q.data && rows.length === 0 && (
           <div className="mx-auto mt-16 max-w-md text-center">
             <CheckCircle2 className="mx-auto h-10 w-10 text-status-delivered" />

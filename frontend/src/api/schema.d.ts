@@ -38,6 +38,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/handoff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Handoff */
+        get: operations["handoff_api_handoff_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Auth Check
+         * @description Reachable only with valid credentials when APP_PASSWORD is set (the auth middleware guards it).
+         */
+        get: operations["auth_check_api_auth_check_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/uploads": {
         parameters: {
             query?: never;
@@ -914,6 +951,10 @@ export interface components {
             map_style_url?: string | null;
             /** Map Style Url Dark */
             map_style_url_dark?: string | null;
+            /** Public Url */
+            public_url?: string | null;
+            /** Hosted Ui Url */
+            hosted_ui_url?: string | null;
         };
         /** GeocoderSettingsIn */
         GeocoderSettingsIn: {
@@ -939,6 +980,17 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** Handoff */
+        Handoff: {
+            /** Lan Url */
+            lan_url: string | null;
+            /** Public Url */
+            public_url: string | null;
+            /** Hosted Ui Url */
+            hosted_ui_url: string | null;
+            /** Auth Required */
+            auth_required: boolean;
         };
         /** JobOut */
         JobOut: {
@@ -1506,6 +1558,46 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    handoff_api_handoff_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Handoff"];
+                };
+            };
+        };
+    };
+    auth_check_api_auth_check_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };

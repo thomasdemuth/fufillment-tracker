@@ -276,12 +276,16 @@ function GeneralTab() {
   const [origin, setOrigin] = useState('')
   const [style, setStyle] = useState('')
   const [styleDark, setStyleDark] = useState('')
+  const [publicUrl, setPublicUrl] = useState('')
+  const [hostedUrl, setHostedUrl] = useState('')
   useEffect(() => {
     if (q.data) {
       setStuck(q.data.stuck_days ?? 7)
       setOrigin(q.data.origin_postal_code ?? '')
       setStyle(q.data.map_style_url ?? '')
       setStyleDark(q.data.map_style_url_dark ?? '')
+      setPublicUrl(q.data.public_url ?? '')
+      setHostedUrl(q.data.hosted_ui_url ?? '')
     }
   }, [q.data])
   return (
@@ -298,6 +302,22 @@ function GeneralTab() {
           <label className="flex flex-col gap-1">
             <Label>Your origin ZIP (optional, used as the start of transit paths before the first scan)</Label>
             <Input value={origin} onChange={(e) => setOrigin(e.target.value)} className="w-40" placeholder="e.g. 90052" />
+          </label>
+        </CardBody>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Phone access</CardTitle>
+        </CardHeader>
+        <CardBody className="flex flex-col gap-3">
+          <p className="text-[12px] text-muted">"Send to phone" builds a link from these. Leave empty to fall back to this machine's LAN address (same Wi-Fi only). See the README for the Cloudflare Tunnel setup.</p>
+          <label className="flex flex-col gap-1">
+            <Label>Public address of this server (HTTPS, e.g. a Cloudflare Tunnel hostname)</Label>
+            <Input value={publicUrl} onChange={(e) => setPublicUrl(e.target.value)} placeholder="https://tracker.example.com" />
+          </label>
+          <label className="flex flex-col gap-1">
+            <Label>Hosted UI address (Cloudflare Pages site; empty = https://fufillment-tracker.pages.dev)</Label>
+            <Input value={hostedUrl} onChange={(e) => setHostedUrl(e.target.value)} placeholder="https://fufillment-tracker.pages.dev" />
           </label>
         </CardBody>
       </Card>
@@ -321,7 +341,7 @@ function GeneralTab() {
         <Button
           onClick={async () => {
             try {
-              await save.mutateAsync({ stuck_days: stuck, origin_postal_code: origin || null, map_style_url: style || null, map_style_url_dark: styleDark || null })
+              await save.mutateAsync({ stuck_days: stuck, origin_postal_code: origin || null, map_style_url: style || null, map_style_url_dark: styleDark || null, public_url: publicUrl || null, hosted_ui_url: hostedUrl || null })
               toast.success('Saved')
             } catch (e) {
               toast.error((e as Error).message)

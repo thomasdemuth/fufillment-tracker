@@ -14,6 +14,10 @@ sent, straight to USPS or FedEx, and only when you click Refresh.
 | ![Map](docs/map.png) | ![Shipment](docs/shipment.png) | ![Attention](docs/attention.png) |
 | ![Heatmap](docs/heatmap.png) | ![Dark mode](docs/board-dark.png) | |
 
+| Phone: board | Phone: shipment | Phone: map |
+|---|---|---|
+| ![Mobile board](docs/mobile-board.png) | ![Mobile shipment](docs/mobile-shipment.png) | ![Mobile map](docs/mobile-map.png) |
+
 ## Quick start (Docker)
 
 ```bash
@@ -58,6 +62,49 @@ the frontend once (`make build`) and use http://localhost:8000 directly.
 
 Keyboard: `⌘/Ctrl+K` opens the command palette (search shipments, jump to pages), `/` focuses search, `Esc` closes
 the drawer.
+
+## Using it from your phone
+
+Every main screen has a **Send to phone** / copy-link button. It copies a link to exactly what you are looking at
+(a shipment, a filtered board, a map view). Where the link points depends on what you have set up, best first:
+
+| You have | The link opens |
+|---|---|
+| `PUBLIC_URL` set (a Cloudflare Tunnel or any HTTPS address for your server) | the hosted UI at `HOSTED_UI_URL` with `?server=<your server>` so it connects with one tap, from anywhere |
+| only the default install | `http://<your LAN IP>:8000/...`, which works on the same Wi-Fi |
+
+If `APP_PASSWORD` is set, the phone asks for it once and remembers it in that browser. Below 768px the app switches to
+a phone layout: bottom tabs, a card list with a filter sheet, a full-screen shipment page with a sticky carrier
+button, and a full-bleed map with a bottom sheet.
+
+### Hosting the UI on Cloudflare Pages (no data leaves your machine)
+
+The frontend can be served from Cloudflare Pages as a pure static site. It holds **no data**: on first open it asks for
+your server's address (or gets it from a handoff link) and talks to your self-hosted backend directly from the browser.
+The backend only needs to allow that origin (`ALLOWED_ORIGINS`, preset for `fufillment-tracker.pages.dev`).
+
+Auto-deploy is wired up in `.github/workflows/deploy-pages.yml`. To turn it on:
+
+1. In Cloudflare, create an API token with the **Cloudflare Pages: Edit** permission and note your **Account ID**.
+2. In GitHub: **Settings → Secrets and variables → Actions**, add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+3. Push (or run the workflow manually). The first run creates a Pages project named after the repository
+   (`fufillment-tracker`) and every later push to `main`/`master`/the feature branch redeploys.
+
+Your UI is then at `https://fufillment-tracker.pages.dev`. Browsers block an `https://` page from calling an
+`http://` LAN address, so for the hosted UI to reach your server it needs an HTTPS address:
+
+**Cloudflare Tunnel (recommended, free):**
+
+```bash
+cloudflared tunnel login
+cloudflared tunnel create tracker
+cloudflared tunnel route dns tracker tracker.example.com      # any hostname on a domain you have in Cloudflare
+cloudflared tunnel run --url http://localhost:8000 tracker
+```
+
+Then set in `.env`: `PUBLIC_URL=https://tracker.example.com` and `APP_PASSWORD=...` (or protect the hostname with
+Cloudflare Access). Restart, click **Send to phone**, and the link opens the hosted UI already connected to your
+server. Only you decide who reaches the tunnel; the data still lives on your machine.
 
 ## Uploading spreadsheets
 
@@ -165,6 +212,9 @@ All options live in `.env` (see `.env.example`):
 | `FEDEX_API_KEY` / `FEDEX_SECRET_KEY` | unset | FedEx credentials via env (override Settings) |
 | `MAP_STYLE_URL` | OpenFreeMap positron | MapLibre style URL for the light basemap |
 | `MAP_STYLE_URL_DARK` | OpenFreeMap fiord | MapLibre style URL for the dark basemap |
+| `PUBLIC_URL` | unset | HTTPS address of this server from outside the LAN (tunnel), used by Send to phone |
+| `HOSTED_UI_URL` | `https://fufillment-tracker.pages.dev` | Where the hosted UI lives; handoff links open it |
+| `ALLOWED_ORIGINS` | the Pages domain + localhost:5173 | Browser origins allowed to call the API |
 
 ## Development
 
@@ -181,7 +231,8 @@ make lint            # ruff + oxlint + tsc
 make seed            # regenerate ./demo spreadsheets
 make demo            # upload ./demo files to a running server and refresh with mock carriers
 make gen-api         # regenerate frontend/src/api/schema.d.ts from the running backend's OpenAPI
-make e2e             # Playwright smoke test against a running server on :8000
+make e2e             # Playwright smoke test (desktop + phone viewport) against a running server on :8000
+pnpm build:hosted    # (in frontend/) build the Cloudflare Pages variant into dist-hosted/
 make docker-build    # build the production image
 ```
 

@@ -8,15 +8,18 @@ export function StatTiles({
   activeStatuses,
   onToggleStatus,
   onAttention,
+  scroll = false,
 }: {
   stats?: Stats
   activeStatuses: string[]
   onToggleStatus: (s: string) => void
   onAttention?: () => void
+  /** phones: one scrolling row instead of a wrapping grid */
+  scroll?: boolean
 }) {
   const total = stats?.total ?? 0
   return (
-    <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(112px, 1fr))' }}>
+    <div className={scroll ? 'flex gap-2 overflow-x-auto pb-1 [&>*]:w-[124px] [&>*]:shrink-0' : 'grid gap-2'} style={scroll ? undefined : { gridTemplateColumns: 'repeat(auto-fit, minmax(112px, 1fr))' }}>
       <Tile label="Total" value={fmtNumber(total)} sub={stats ? `${stats.by_carrier.usps ?? 0} USPS · ${stats.by_carrier.fedex ?? 0} FedEx` : undefined} />
       {STATUS_ORDER.map((s) => {
         const n = stats?.by_status?.[s] ?? 0

@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Feature, FeatureCollection, Point } from 'geojson'
-import { api, unwrap } from './client'
+import { api, authEvents, unwrap } from './client'
+import { apiUrl, authHeaders } from '@/lib/server'
 import type { components } from './schema'
 import { filtersToQuery, type Filters } from '@/lib/filters'
 
@@ -73,7 +74,8 @@ export function useUploadFile() {
     mutationFn: async (file: File) => {
       const fd = new FormData()
       fd.append('file', file)
-      const res = await fetch('/api/uploads', { method: 'POST', body: fd })
+      const res = await fetch(apiUrl('/api/uploads'), { method: 'POST', body: fd, headers: authHeaders() })
+      if (res.status === 401) authEvents.dispatchEvent(new Event('unauthorized'))
       if (!res.ok) {
         let msg = res.statusText
         try {

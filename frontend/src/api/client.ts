@@ -1,7 +1,6 @@
-import createClient from 'openapi-fetch'
+import createClient, { type Middleware } from 'openapi-fetch'
 import type { paths } from './schema'
-
-export const api = createClient<paths>({ baseUrl: '/' })
+import { authHeaders, getServerUrl } from '@/lib/server'
 
 export class ApiError extends Error {
   status: number
@@ -9,6 +8,38 @@ export class ApiError extends Error {
     super(message)
     this.status = status
   }
+}
+
+/** Fires when the server answers 401 so the app can show the login screen. */
+export const authEvents = new EventTarget()
+
+const middleware: Middleware = {
+  async onRequest({ request }) {
+    for (const [k, v] of Object.entries(authHeaders())) request.headers.set(k, v)
+    return request
+  },
+  async onResponse({ response }) {
+    if (response.status === 401) authEvents.dispatchEvent(new Event('unauthorized'))
+    return response
+  },
+}
+
+function makeClient() {
+  const c = createClient<paths>({ baseUrl: getServerUrl() || '/', credentials: getServerUrl() ? 'omit' : 'same-origin' })
+  c.use(middleware)
+  return c
+}
+
+let _api = makeClient()
+export const api: ReturnType<typeof makeClient> = new Proxy({} as ReturnType<typeof makeClient>, {
+  get(_t, prop) {
+    return (_api as unknown as Record<PropertyKey, unknown>)[prop]
+  },
+})
+
+/** Rebuild the client after the server URL changes (hosted mode). */
+export function resetApiClient() {
+  _api = makeClient()
 }
 
 export function errorMessage(err: unknown): string {

@@ -4,6 +4,7 @@ from app.api import (
     attention,
     config,
     export,
+    handoff,
     health,
     map,
     notes_tags,
@@ -18,6 +19,7 @@ from app.api import (
 api_router = APIRouter()
 api_router.include_router(health.router, tags=["health"])
 api_router.include_router(config.router, tags=["config"])
+api_router.include_router(handoff.router, tags=["handoff"])
 api_router.include_router(uploads.router, tags=["uploads"])
 api_router.include_router(presets.router, tags=["presets"])
 api_router.include_router(shipments.router, tags=["shipments"])

@@ -1,5 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { AppShell } from '@/components/layout/AppShell'
+import { MobileShell } from '@/components/layout/MobileShell'
+import { useIsMobile } from '@/lib/useIsMobile'
 import { MapPage } from '@/pages/MapPage'
 import { BoardPage } from '@/pages/BoardPage'
 import { AttentionPage } from '@/pages/AttentionPage'
@@ -9,10 +11,15 @@ import { ShipmentPage } from '@/pages/ShipmentPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { PrivacyPage } from '@/pages/PrivacyPage'
 
+function Shell() {
+  const mobile = useIsMobile()
+  return mobile ? <MobileShell /> : <AppShell />
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <AppShell />,
+    element: <Shell />,
     children: [
       { index: true, element: <Navigate to="/map" replace /> },
       { path: 'map', element: <MapPage /> },

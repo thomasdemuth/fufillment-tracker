@@ -4,12 +4,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router'
 import { Toaster } from 'sonner'
 import { router } from './routes'
+import { AppGate } from './components/layout/AppGate'
+import { applyHandoffParams } from './lib/server'
 import { applyTheme, useUiStore } from './stores/uiStore'
 import './index.css'
 
+applyHandoffParams()
 applyTheme(useUiStore.getState().theme)
 window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  applyTheme(useUiStore.getState().theme)
+  applyHandoffParams()
+applyTheme(useUiStore.getState().theme)
 })
 
 const queryClient = new QueryClient({
@@ -19,7 +23,9 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AppGate>
+        <RouterProvider router={router} />
+      </AppGate>
       <Toaster richColors position="bottom-right" closeButton />
     </QueryClientProvider>
   </StrictMode>,

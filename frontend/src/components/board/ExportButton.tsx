@@ -2,15 +2,31 @@ import { useState } from 'react'
 import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { dataFilters, filtersToParams, type Filters } from '@/lib/filters'
+import { apiUrl, authHeaders, getToken } from '@/lib/server'
 
 export function ExportButton({ filters }: { filters: Filters }) {
   const [open, setOpen] = useState(false)
   const go = (format: 'csv' | 'xlsx') => {
     const p = filtersToParams({ ...dataFilters(filters), sort: filters.sort })
     p.set('format', format)
-    // Downloads are same-origin; no data leaves the machine.
-    window.location.href = `/api/export?${p.toString()}`
     setOpen(false)
+    const url = apiUrl(`/api/export?${p.toString()}`)
+    if (!getToken()) {
+      // plain navigation: the browser handles the download (same-origin or CORS with Content-Disposition)
+      window.location.href = url
+      return
+    }
+    // With a bearer token the download must go through fetch so the header is sent.
+    void (async () => {
+      const res = await fetch(url, { headers: authHeaders() })
+      const blob = await res.blob()
+      const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? `shipments.${format}`
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = name
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000)
+    })()
   }
   return (
     <div className="relative">

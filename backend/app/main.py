@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -56,6 +57,17 @@ def create_app() -> FastAPI:
 
     if settings.app_password:
         app.add_middleware(BasicAuthMiddleware, password=settings.app_password)
+
+    origins = [o.strip() for o in settings.allowed_origins.split(",") if o.strip()]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_origin_regex=r"https://[a-z0-9-]+\.fufillment-tracker\.pages\.dev",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["Content-Disposition"],
+    )
 
     extra_connect = [
         "https://nominatim.openstreetmap.org",

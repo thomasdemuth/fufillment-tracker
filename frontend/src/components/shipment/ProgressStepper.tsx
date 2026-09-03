@@ -113,7 +113,7 @@ export function ProgressStepper({ shipment, actions }: { shipment: Input; action
                 ) : null}
                 <span className="truncate">{m.problem && current ? (m.problem === 'returned' ? 'Returned' : 'Exception') : st.label}</span>
               </div>
-              {t && <div className="truncate text-[10.5px] font-normal text-muted">{fmtDate(t, true)}</div>}
+              {t && <div className="truncate text-[10.5px] font-normal text-muted" title={fmtDate(t, true)}>{fmtDate(t)}</div>}
             </li>
           )
         })}

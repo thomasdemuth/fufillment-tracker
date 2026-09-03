@@ -14,6 +14,8 @@ DEFAULTS: dict[str, Any] = {
     "nominatim_email": None,
     "map_style_url": None,
     "map_style_url_dark": None,
+    "public_url": None,
+    "hosted_ui_url": None,
 }
 
 

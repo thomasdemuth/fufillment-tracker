@@ -75,7 +75,12 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):  # noqa: ANN001
         if request.url.path in self.exempt_paths:
             return await call_next(request)
+        if request.method == "OPTIONS":  # CORS preflight carries no credentials
+            return await call_next(request)
         header = request.headers.get("authorization", "")
+        if header.lower().startswith("bearer "):
+            if hmac.compare_digest(header[7:].strip().encode(), self.password):
+                return await call_next(request)
         if header.lower().startswith("basic "):
             try:
                 decoded = base64.b64decode(header[6:]).decode()
@@ -84,11 +89,12 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
                     return await call_next(request)
             except Exception:
                 pass
-        return Response(
-            "Authentication required",
-            status_code=401,
-            headers={"WWW-Authenticate": 'Basic realm="Fulfillment Tracker"'},
+        # Cross-origin callers (the hosted UI) get a plain 401 so the browser doesn't show a Basic prompt;
+        # same-origin browsers still get the prompt.
+        headers = (
+            {} if request.headers.get("origin") else {"WWW-Authenticate": 'Basic realm="Fulfillment Tracker"'}
         )
+        return Response("Authentication required", status_code=401, headers=headers)
 
 
 def new_confirm_token() -> str:

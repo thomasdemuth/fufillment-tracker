@@ -52,6 +52,8 @@ def get_general(db: Session = Depends(get_db)):
         origin_postal_code=s.get("origin_postal_code"),
         map_style_url=s.get("map_style_url"),
         map_style_url_dark=s.get("map_style_url_dark"),
+        public_url=s.get("public_url"),
+        hosted_ui_url=s.get("hosted_ui_url"),
     )
 
 

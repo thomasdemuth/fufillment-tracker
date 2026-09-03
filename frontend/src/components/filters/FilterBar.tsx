@@ -51,12 +51,15 @@ export function FilterBar({
   reset,
   facets,
   compact,
+  stacked,
 }: {
   filters: Filters
   setFilters: (p: Partial<Filters>) => void
   reset: () => void
   facets?: Facets
   compact?: boolean
+  /** phones: vertical layout inside a sheet, no search field, 'more' always open */
+  stacked?: boolean
 }) {
   const [q, setQ] = useState(filters.q ?? '')
   useEffect(() => setQ(filters.q ?? ''), [filters.q])
@@ -67,12 +70,13 @@ export function FilterBar({
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q])
-  const [more, setMore] = useState(false)
+  const [more, setMore] = useState(!!stacked)
   const n = countActiveFilters(filters)
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={cn('flex flex-wrap items-center gap-2', stacked && '[&>div]:w-full [&>div>button]:w-full [&>div>button]:justify-between [&>div>button]:h-10')}>
+        {!stacked && (
         <Input
           id="global-search"
           value={q}
@@ -80,6 +84,7 @@ export function FilterBar({
           placeholder="Search name, tracking, order, city…  ( / )"
           className={compact ? 'w-56' : 'w-72'}
         />
+        )}
         <MultiSelect
           label="Status"
           values={filters.status}
@@ -107,17 +112,19 @@ export function FilterBar({
         {(facets?.tags?.length ?? 0) > 0 && (
           <MultiSelect label="Tag" values={filters.tag} options={(facets?.tags ?? []).map((t) => ({ value: t.name, label: t.name }))} onChange={(tag) => setFilters({ tag })} />
         )}
+        {!stacked && (
         <Button variant={more ? 'secondary' : 'ghost'} size="sm" onClick={() => setMore((m) => !m)}>
           <Filter className="h-3.5 w-3.5" /> More
         </Button>
-        {n > 0 && (
+        )}
+        {n > 0 && !stacked && (
           <Button variant="ghost" size="sm" onClick={reset} className="text-muted">
             <X className="h-3.5 w-3.5" /> Clear {n}
           </Button>
         )}
       </div>
       {more && (
-        <div className="flex flex-wrap items-end gap-3 rounded-control border border-border bg-panel-2/60 p-2 text-xs">
+        <div className={cn('flex flex-wrap items-end gap-3 rounded-control border border-border bg-panel-2/60 p-2 text-xs', stacked && 'grid grid-cols-2 [&_input:not([type=checkbox])]:h-10 [&_select]:h-10 [&_input:not([type=checkbox])]:w-full [&_input[type=checkbox]]:h-5 [&_input[type=checkbox]]:w-5')}>
           <Field label="City">
             <Input value={filters.city ?? ''} onChange={(e) => setFilters({ city: e.target.value || undefined })} className="h-8 w-36" placeholder="contains…" />
           </Field>

@@ -33,9 +33,10 @@ export interface MapViewProps {
   onStateClick?: (postal: string) => void
   selectedId?: number | null
   fitOnData?: boolean
+  controlsPosition?: 'top-right' | 'bottom-right'
 }
 
-export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick, selectedId, fitOnData = true }: MapViewProps) {
+export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick, selectedId, fitOnData = true, controlsPosition = 'top-right' }: MapViewProps) {
   const mapRef = useRef<MapRef>(null)
   const dark = useIsDark()
   const p = useMemo(() => mapPalette(dark), [dark])
@@ -154,7 +155,7 @@ export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick
       attributionControl={{ compact: true }}
       reuseMaps
     >
-      <NavigationControl position="top-right" showCompass={false} />
+      <NavigationControl position={controlsPosition} showCompass={false} />
       <ScaleControl position="bottom-left" unit="imperial" />
 
       <Source id={SRC_STATES} type="geojson" data="/geo/us-states.geojson" promoteId="postal">

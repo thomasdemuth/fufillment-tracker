@@ -4,10 +4,16 @@ import { Maximize2, X } from 'lucide-react'
 import { useShipment } from '@/api/queries'
 import { Button } from '@/components/ui/button'
 import { ShipmentDetailBody } from '@/components/shipment/ShipmentDetailBody'
+import { ShareButton } from '@/components/layout/ShareButton'
+import { useIsMobile } from '@/lib/useIsMobile'
 
 export function ShipmentDrawer({ id, onClose }: { id: number | null; onClose: () => void }) {
   const q = useShipment(id)
   const navigate = useNavigate()
+  const mobile = useIsMobile()
+  useEffect(() => {
+    if (mobile && id != null) navigate(`/shipments/${id}`, { replace: true })
+  }, [mobile, id, navigate])
   useEffect(() => {
     if (id == null) return
     const onKey = (e: KeyboardEvent) => {
@@ -16,7 +22,7 @@ export function ShipmentDrawer({ id, onClose }: { id: number | null; onClose: ()
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [id, onClose])
-  if (id == null) return null
+  if (id == null || mobile) return null
   return (
     <>
       <div className="fixed inset-0 z-30 bg-text/20" onClick={onClose} />
@@ -27,6 +33,7 @@ export function ShipmentDrawer({ id, onClose }: { id: number | null; onClose: ()
             <div className="truncate text-[11px] text-muted">{q.data ? [q.data.city, q.data.state].filter(Boolean).join(', ') : ''}</div>
           </div>
           <div className="flex items-center gap-1">
+            <ShareButton compact />
             <Button variant="ghost" size="icon" title="Open full page" onClick={() => navigate(`/shipments/${id}`)}>
               <Maximize2 className="h-4 w-4" />
             </Button>

@@ -54,11 +54,10 @@ export function useBasemap(styleUrl: string): BasemapState {
 export function BasemapBanner({ state }: { state: BasemapState }) {
   if (!state.unavailable) return null
   return (
-    <div className="pointer-events-auto absolute left-1/2 top-14 z-20 flex max-w-[min(90%,640px)] -translate-x-1/2 items-center gap-2 rounded-control border border-border bg-panel/95 px-3 py-1.5 text-[12px] text-text-2 shadow-pop backdrop-blur">
-      <WifiOff className="h-3.5 w-3.5 text-muted" />
-      <span>
-        Basemap unavailable, showing your data on a blank background. Check your internet connection or set an offline style in Settings.
-      </span>
+    <div className="pointer-events-auto absolute left-1/2 top-14 z-20 flex max-w-[min(92%,640px)] -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-control border border-border bg-panel/95 px-3 py-1.5 text-[12px] text-text-2 shadow-pop backdrop-blur">
+      <WifiOff className="h-3.5 w-3.5 shrink-0 text-muted" />
+      <span className="hidden sm:inline">Basemap unavailable, showing your data on a blank background. Check your internet connection or set an offline style in Settings.</span>
+      <span className="sm:hidden">Basemap offline · data only</span>
       <button onClick={state.retry} className="inline-flex items-center gap-1 font-medium text-accent hover:underline">
         <RefreshCw className="h-3 w-3" /> Retry
       </button>

@@ -1,10 +1,10 @@
 // Screenshot helper: node e2e/shoot.mjs "/path|name[|dark][|click=Button text]" ...
-import { chromium } from '@playwright/test'
+import { chromium, devices } from '@playwright/test'
 const out = process.env.SHOT_DIR || 'screenshots'
 const base = process.env.BASE_URL || 'http://localhost:8000'
 const specs = process.argv.slice(2)
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' })
-const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light' })
+const ctx = await browser.newContext(process.env.MOBILE ? { ...devices['iPhone 13'], colorScheme: 'light' } : { viewport: { width: 1440, height: 900 }, colorScheme: 'light' })
 const page = await ctx.newPage()
 page.on('pageerror', (e) => console.log('PAGEERROR', e.message))
 page.on('console', (m) => { if (m.type() === 'error') console.log('CONSOLE', m.text().slice(0, 200)) })

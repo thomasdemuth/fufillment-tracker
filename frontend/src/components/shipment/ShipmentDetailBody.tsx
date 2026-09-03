@@ -14,7 +14,7 @@ import { TagPicker } from '@/components/shipment/TagPicker'
 import { fmtDate, fmtDays } from '@/lib/format'
 import { useIsDark } from '@/stores/uiStore'
 
-export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDeleted?: () => void }) {
+export function ShipmentDetailBody({ s, onDeleted, mobile = false }: { s: ShipmentDetail; onDeleted?: () => void; mobile?: boolean }) {
   const config = useConfig()
   const dark = useIsDark()
   const path = useShipmentPath(s.id)
@@ -44,6 +44,7 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
       <ProgressStepper
         shipment={s}
         actions={
+          mobile ? null : (
           <>
             <Button size="sm" variant="outline" onClick={onRefresh} disabled={refresh.isPending}>
               <RefreshCw className={`h-3.5 w-3.5 ${refresh.isPending ? 'animate-spin' : ''}`} /> Refresh
@@ -54,6 +55,7 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
               </Button>
             )}
           </>
+          )
         }
       />
       {s.poll_last_error && <div className="rounded-control border border-danger/30 bg-danger-soft px-3 py-2 text-[12px] text-danger">{s.poll_last_error}</div>}
@@ -61,7 +63,7 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
       {/* key facts */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 rounded-card border border-border bg-panel-2/50 p-3 text-[12px] sm:grid-cols-4">
         <Fact label="Status" value={<StatusBadge status={s.status} />} />
-        <Fact label="Tracking" value={<span className="inline-flex items-center gap-1.5"><CarrierBadge carrier={s.carrier} confidence={s.carrier_confidence} /><span className="select-all truncate font-mono text-[11.5px]" title={s.tracking_number}>{s.tracking_number}</span></span>} />
+        <Fact label="Tracking" className="col-span-2 sm:col-span-1" value={<span className="flex min-w-0 items-center gap-1.5"><CarrierBadge carrier={s.carrier} confidence={s.carrier_confidence} /><span className="select-all truncate font-mono text-[11.5px]" title={s.tracking_number}>{s.tracking_number}</span></span>} />
         <Fact label="Order" value={s.order_ref ?? '—'} />
         <Fact label="Shipped" value={fmtDate(s.ship_date)} />
         <Fact label="Days in transit" value={fmtDays(s.days_in_transit)} />
@@ -116,7 +118,7 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
         <SectionLabel className="mb-1.5 flex items-center gap-1">
           <MapPin className="h-3.5 w-3.5" /> Transit path
         </SectionLabel>
-        {config.data && <TransitPathMap styleUrl={dark ? config.data.map_style_url_dark : config.data.map_style_url} path={path.data} />}
+        {config.data && <TransitPathMap styleUrl={dark ? config.data.map_style_url_dark : config.data.map_style_url} path={path.data} height={mobile ? 220 : 260} />}
         <div className="mt-1 text-[11px] text-muted">Scan locations are placed at city/ZIP centers. Dashed line = remaining leg to the destination.</div>
       </section>
 
@@ -139,9 +141,9 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
   )
 }
 
-function Fact({ label, value }: { label: string; value: React.ReactNode }) {
+function Fact({ label, value, className }: { label: string; value: React.ReactNode; className?: string }) {
   return (
-    <div className="min-w-0">
+    <div className={`min-w-0 ${className ?? ''}`}>
       <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-muted">{label}</div>
       <div className="mt-0.5 truncate text-text">{value}</div>
     </div>
