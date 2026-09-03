@@ -117,7 +117,7 @@ export function useDeleteUpload() {
   })
 }
 
-export type AppConfig = { app_name: string; map_style_url: string; carrier_mode: string; auth_enabled: boolean; stuck_days: number }
+export type AppConfig = { app_name: string; map_style_url: string; map_style_url_dark: string; carrier_mode: string; auth_enabled: boolean; stuck_days: number }
 
 export function useConfig() {
   return useQuery({

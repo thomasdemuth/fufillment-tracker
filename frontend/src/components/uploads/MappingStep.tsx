@@ -89,10 +89,10 @@ export function MappingStep({
                 </option>
               ))}
             </Select>
-            {preview.matched_preset_id && <div className="mt-1 text-[11px] text-emerald-600">A preset matching these headers was applied automatically.</div>}
+            {preview.matched_preset_id && <div className="mt-1 text-[11px] text-status-delivered">A preset matching these headers was applied automatically.</div>}
           </div>
         )}
-        <div className="rounded-lg border border-border">
+        <div className="rounded-control border border-border">
           <div className="border-b border-border px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted">Columns</div>
           <div className="divide-y divide-border">
             {fields.map((f) => {
@@ -101,7 +101,7 @@ export function MappingStep({
                 <div key={f.key} className="flex items-center gap-2 px-3 py-1.5">
                   <div className="w-40 shrink-0 text-sm">
                     {f.label}
-                    {f.required && <span className="text-red-500"> *</span>}
+                    {f.required && <span className="text-danger"> *</span>}
                   </div>
                   <Select value={val} onChange={(e) => setField(f.key, e.target.value)} className={cn('h-8 flex-1 text-xs', val && 'border-accent/50')}>
                     <option value="">—</option>
@@ -167,17 +167,17 @@ export function MappingStep({
             Preview · first {preview.sample_rows.length} of {preview.row_count} rows
           </span>
           <span className="inline-flex items-center gap-1">
-            <Check className="h-3 w-3 text-emerald-500" /> mapped columns are highlighted
+            <Check className="h-3 w-3 text-status-delivered" /> mapped columns are highlighted
           </span>
         </div>
-        <div className="overflow-auto rounded-lg border border-border">
+        <div className="overflow-auto rounded-control border border-border">
           <table className="min-w-full border-separate border-spacing-0 text-xs">
             <thead className="sticky top-0 bg-panel">
               <tr>
                 {preview.headers.map((h) => {
                   const f = headerToField[h]
                   return (
-                    <th key={h} className={cn('whitespace-nowrap border-b border-border px-2 py-1.5 text-left font-semibold', f ? 'bg-accent/10 text-accent' : 'text-muted')}>
+                    <th key={h} className={cn('whitespace-nowrap border-b border-border px-2 py-1.5 text-left font-semibold', f ? 'bg-accent-soft text-accent' : 'text-muted')}>
                       <div>{h}</div>
                       {f && <div className="text-[10px] font-normal opacity-80">→ {fields.find((x) => x.key === f)?.label ?? f}</div>}
                     </th>
@@ -189,7 +189,7 @@ export function MappingStep({
               {preview.sample_rows.map((r, i) => (
                 <tr key={i} className="odd:bg-panel-2/40">
                   {preview.headers.map((h, j) => (
-                    <td key={j} className={cn('max-w-[220px] truncate border-b border-border px-2 py-1', headerToField[h] && 'bg-accent/5')} title={r[j]}>
+                    <td key={j} className={cn('max-w-[220px] truncate border-b border-border px-2 py-1', headerToField[h] && 'bg-accent-soft')} title={r[j]}>
                       {r[j]}
                     </td>
                   ))}
@@ -205,7 +205,7 @@ export function MappingStep({
 
 function Note({ tone, children }: { tone: 'warn' | 'error'; children: React.ReactNode }) {
   return (
-    <div className={cn('flex items-start gap-2 rounded-md border px-3 py-2 text-xs', tone === 'error' ? 'border-red-500/40 bg-red-500/5 text-red-600' : 'border-amber-500/40 bg-amber-500/5 text-amber-700 dark:text-amber-300')}>
+    <div className={cn('flex items-start gap-2 rounded-md border px-3 py-2 text-xs', tone === 'error' ? 'border-danger/40 bg-danger-soft text-danger' : 'border-status-ofd/40 bg-status-ofd/5 text-text')}>
       {children}
     </div>
   )

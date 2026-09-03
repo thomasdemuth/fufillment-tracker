@@ -50,6 +50,7 @@ class GeneralSettings(BaseModel):
     stuck_days: int | None = None
     origin_postal_code: str | None = None
     map_style_url: str | None = None
+    map_style_url_dark: str | None = None
 
 
 class PrivacySummary(BaseModel):

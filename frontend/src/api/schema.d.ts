@@ -912,6 +912,8 @@ export interface components {
             origin_postal_code?: string | null;
             /** Map Style Url */
             map_style_url?: string | null;
+            /** Map Style Url Dark */
+            map_style_url_dark?: string | null;
         };
         /** GeocoderSettingsIn */
         GeocoderSettingsIn: {

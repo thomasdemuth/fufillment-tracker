@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 import { useAddNote, useDeleteNote, type ShipmentDetail } from '@/api/queries'
 import { Button } from '@/components/ui/button'
+import { SectionLabel } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/input'
 import { fmtDate } from '@/lib/format'
 
@@ -21,14 +22,14 @@ export function NotesPanel({ shipment }: { shipment: ShipmentDetail }) {
   }
   return (
     <section>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Notes</h3>
+      <SectionLabel className="mb-2">Notes</SectionLabel>
       <div className="flex flex-col gap-2">
         {shipment.notes.map((n) => (
-          <div key={n.id} className="group rounded-lg border border-border bg-panel-2/50 px-3 py-2 text-sm">
+          <div key={n.id} className="group rounded-control border border-border bg-panel-2/50 px-3 py-2 text-sm">
             <div className="whitespace-pre-wrap">{n.body}</div>
             <div className="mt-1 flex items-center justify-between text-[11px] text-muted">
               <span>{fmtDate(n.created_at, true)}</span>
-              <button className="opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100" onClick={() => del.mutate({ id: shipment.id, noteId: n.id })} title="Delete note">
+              <button className="opacity-0 transition-opacity hover:text-danger group-hover:opacity-100" onClick={() => del.mutate({ id: shipment.id, noteId: n.id })} title="Delete note">
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>

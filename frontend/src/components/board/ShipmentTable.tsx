@@ -182,7 +182,7 @@ export function ShipmentTable({
                   {pickerOpen && (
                     <>
                       <div className="fixed inset-0 z-20" onClick={() => setPickerOpen(false)} />
-                      <div className="absolute right-0 top-8 z-30 w-48 rounded-md border border-border bg-panel p-1 text-left shadow-lg">
+                      <div className="absolute right-0 top-8 z-30 w-48 rounded-md border border-border bg-panel p-1 text-left shadow-pop">
                         {table.getAllLeafColumns().map((c) => (
                           <label key={c.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm font-normal normal-case tracking-normal text-text hover:bg-panel-2">
                             <input type="checkbox" checked={c.getIsVisible()} onChange={c.getToggleVisibilityHandler()} />
@@ -202,7 +202,7 @@ export function ShipmentTable({
                 key={r.id}
                 data-shipment-id={r.original.id}
                 onClick={() => onRowClick(r.original)}
-                className={cn('cursor-pointer hover:bg-panel-2', selectedId === r.original.id && 'bg-accent/10')}
+                className={cn('cursor-pointer hover:bg-panel-2', selectedId === r.original.id && 'bg-accent-soft')}
               >
                 {r.getVisibleCells().map((c) => (
                   <td key={c.id} className="max-w-[260px] border-b border-border px-3 py-1.5 align-middle">

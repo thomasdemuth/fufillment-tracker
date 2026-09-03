@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Map, { Layer, NavigationControl, Source, type MapRef } from 'react-map-gl/maplibre'
 import type { FeatureCollection, LineString, Point } from 'geojson'
-import { pathFutureLineLayer, pathLabelLayer, pathLineLayer, pathPointLayer } from '@/lib/mapLayers'
+import { mapPalette, pathFutureLineLayer, pathLabelLayer, pathLineLayer, pathPointLayer } from '@/lib/mapLayers'
+import { useIsDark } from '@/stores/uiStore'
+import { useBasemap } from '@/components/map/useBasemap'
 
 export type PathCollection = FeatureCollection<Point | LineString, Record<string, unknown>>
 
 export function TransitPathMap({ styleUrl, path, height = 260 }: { styleUrl: string; path?: PathCollection; height?: number }) {
   const ref = useRef<MapRef>(null)
-  const [style, setStyle] = useState(styleUrl)
+  const dark = useIsDark()
+  const p = useMemo(() => mapPalette(dark), [dark])
+  const basemap = useBasemap(styleUrl)
   const [loaded, setLoaded] = useState(false)
-  useEffect(() => setStyle(styleUrl), [styleUrl])
 
   useEffect(() => {
     const map = ref.current?.getMap()
@@ -35,30 +38,30 @@ export function TransitPathMap({ styleUrl, path, height = 260 }: { styleUrl: str
 
   const empty = !path || path.features.length === 0
   return (
-    <div className="relative overflow-hidden rounded-lg border border-border" style={{ height }}>
+    <div className="relative overflow-hidden rounded-card border border-border" style={{ height }}>
       <Map
         ref={ref}
-        mapStyle={style}
+        mapStyle={basemap.style}
         initialViewState={{ longitude: -96, latitude: 38, zoom: 3 }}
         style={{ width: '100%', height: '100%' }}
         onLoad={() => setLoaded(true)}
-        onError={() => style !== '/geo/blank-style.json' && setStyle('/geo/blank-style.json')}
+        onError={(e) => basemap.onError(String((e as { error?: { message?: string } }).error?.message ?? ''))}
         attributionControl={{ compact: true }}
         interactive
       >
         <NavigationControl position="top-right" showCompass={false} />
         {path && (
           <Source id="path" type="geojson" data={path}>
-            <Layer {...pathLineLayer()} filter={['all', ['==', ['geometry-type'], 'LineString'], ['!=', ['get', 'future'], true]]} />
-            <Layer {...pathFutureLineLayer()} />
-            <Layer {...pathPointLayer()} />
-            <Layer {...pathLabelLayer()} />
+            <Layer {...pathLineLayer(p)} />
+            <Layer {...pathFutureLineLayer(p)} />
+            <Layer {...pathPointLayer(p)} />
+            <Layer {...pathLabelLayer(p)} />
           </Source>
         )}
       </Map>
       {empty && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-muted">
-          <span className="rounded bg-panel/90 px-2 py-1">No location data yet</span>
+          <span className="rounded-control border border-border bg-panel/95 px-2 py-1 text-muted">No location data yet</span>
         </div>
       )}
     </div>

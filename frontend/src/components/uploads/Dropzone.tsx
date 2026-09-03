@@ -20,8 +20,8 @@ export function Dropzone({ onFile, busy }: { onFile: (f: File) => void; busy?: b
       }}
       onClick={() => input.current?.click()}
       className={cn(
-        'flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-panel px-6 py-16 text-center transition-colors hover:border-accent hover:bg-panel-2/50',
-        over && 'border-accent bg-accent/5',
+        'flex cursor-pointer flex-col items-center justify-center rounded-card border-2 border-dashed border-border bg-panel px-6 py-16 text-center transition-colors hover:border-accent hover:bg-panel-2/50',
+        over && 'border-accent bg-accent-soft',
         busy && 'pointer-events-none opacity-60',
       )}
     >

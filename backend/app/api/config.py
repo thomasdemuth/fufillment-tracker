@@ -16,6 +16,7 @@ def config(db: Session = Depends(get_db)) -> dict:
     return {
         "app_name": s.app_name,
         "map_style_url": get_setting(db, "map_style_url") or s.map_style_url,
+        "map_style_url_dark": get_setting(db, "map_style_url_dark") or s.map_style_url_dark,
         "carrier_mode": s.carrier_mode,
         "auth_enabled": bool(s.app_password),
         "stuck_days": get_setting(db, "stuck_days", 7),

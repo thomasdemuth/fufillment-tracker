@@ -21,7 +21,8 @@ class Settings(BaseSettings):
     usps_client_secret: str | None = None
     fedex_api_key: str | None = None
     fedex_secret_key: str | None = None
-    map_style_url: str = "https://tiles.openfreemap.org/styles/liberty"
+    map_style_url: str = "https://tiles.openfreemap.org/styles/positron"
+    map_style_url_dark: str = "https://tiles.openfreemap.org/styles/fiord"
     frontend_dist: Path | None = None
     log_level: str = "INFO"
 

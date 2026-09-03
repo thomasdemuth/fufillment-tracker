@@ -57,8 +57,8 @@ export function CommandPalette() {
   }
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 pt-[12vh]" onClick={() => setOpen(false)}>
-      <Command className="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-panel shadow-2xl" onClick={(e) => e.stopPropagation()} shouldFilter={false} label="Search">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-text/25 pt-[12vh]" onClick={() => setOpen(false)}>
+      <Command className="w-full max-w-xl overflow-hidden rounded-card border border-border bg-panel shadow-pop" onClick={(e) => e.stopPropagation()} shouldFilter={false} label="Search">
         <div className="flex items-center gap-2 border-b border-border px-3">
           <Search className="h-4 w-4 text-muted" />
           <Command.Input value={q} onValueChange={setQ} placeholder="Search shipments by name, tracking, order, city… or jump to a page" className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted" autoFocus />

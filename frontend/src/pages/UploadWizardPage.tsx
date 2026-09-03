@@ -104,8 +104,8 @@ export function UploadWizardPage() {
           </div>
         )}
         {step === 'done' && result && (
-          <div className="mx-auto mt-8 max-w-lg rounded-2xl border border-border bg-panel p-6 text-center shadow-sm">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
+          <div className="mx-auto mt-8 max-w-lg rounded-card border border-border bg-panel p-6 text-center shadow-card">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-status-delivered/15 text-status-delivered">
               <Check className="h-6 w-6" />
             </div>
             <h2 className="mt-3 text-lg font-semibold">Imported {result.upload.filename}</h2>
@@ -172,8 +172,8 @@ function Steps({ step }: { step: Step }) {
 
 function Big({ label, value, warn }: { label: string; value: number; warn?: boolean }) {
   return (
-    <div className="rounded-lg bg-panel-2 px-3 py-2">
-      <div className={cn('text-2xl font-semibold tabular-nums', warn && 'text-amber-600')}>{value}</div>
+    <div className="rounded-control bg-panel-2 px-3 py-2">
+      <div className={cn('text-2xl font-semibold tabular-nums', warn && 'text-status-ofd')}>{value}</div>
       <div className="text-[11px] text-muted">{label}</div>
     </div>
   )

@@ -79,7 +79,7 @@ export function RefreshButton({ filters }: { filters: Filters }) {
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-10 z-30 w-72 rounded-lg border border-border bg-panel p-3 text-sm shadow-xl">
+          <div className="absolute right-0 top-10 z-30 w-72 rounded-control border border-border bg-panel p-3 text-sm shadow-pop">
             <div className="mb-2 text-xs text-muted">Fetches the latest status from USPS/FedEx. Only tracking numbers are sent. Delivered and returned shipments are skipped unless included.</div>
             <label className="mb-3 flex items-center gap-2 text-xs">
               <input type="checkbox" checked={includeTerminal} onChange={(e) => setIncludeTerminal(e.target.checked)} /> Include delivered / returned

@@ -36,31 +36,31 @@ export function PrivacyPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-emerald-500" /> What leaves this machine
+                <ShieldCheck className="h-4 w-4 text-status-delivered" /> What leaves this machine
               </CardTitle>
             </CardHeader>
             <CardBody className="text-sm">
               <ul className="flex flex-col gap-2">
                 <li className="flex gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-status-delivered" />
                   <span>
                     <span className="font-medium">Tracking numbers</span> go directly to USPS and FedEx when you click Refresh (live mode only). Names and addresses are never included.
                   </span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-status-delivered" />
                   <span>
                     <span className="font-medium">Map tile requests</span> reveal only which area of the map you are looking at, to <span className="font-mono">{s?.tile_host}</span>. No shipment data is attached.
                   </span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-status-ofd" />
                   <span>
                     <span className="font-medium">Street addresses</span> are sent to the geocoder (<span className="font-mono">{s?.geocoder}</span>) only for uploads where you explicitly chose street-level geocoding.
                   </span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted" />
                   <span>Nothing else. No analytics, no telemetry, no update checks, no third-party scripts or fonts.</span>
                 </li>
               </ul>
@@ -143,9 +143,9 @@ export function PrivacyPage() {
             </CardBody>
           </Card>
 
-          <Card className="lg:col-span-2 border-red-500/30">
+          <Card className="lg:col-span-2 border-danger/30">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-red-600">
+              <CardTitle className="flex items-center gap-2 text-danger">
                 <Trash2 className="h-4 w-4" /> Wipe all data
               </CardTitle>
             </CardHeader>
@@ -169,7 +169,7 @@ export function PrivacyPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-panel-2 px-2 py-1.5">
+    <div className="rounded-control bg-panel-2 px-2 py-1.5">
       <div className="text-base font-semibold tabular-nums">{value}</div>
       <div className="text-[10px] text-muted">{label}</div>
     </div>

@@ -18,7 +18,7 @@ export function ShipmentPage() {
       </PageHeader>
       <div className="flex-1 overflow-auto p-5">
         <div className="mx-auto max-w-3xl">
-          {q.isError && <div className="text-sm text-red-600">Shipment not found.</div>}
+          {q.isError && <div className="text-sm text-danger">Shipment not found.</div>}
           {q.data && <ShipmentDetailBody s={q.data} onDeleted={() => navigate('/board')} />}
         </div>
       </div>

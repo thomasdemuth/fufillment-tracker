@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { LayoutList, Upload } from 'lucide-react'
 import { useConfig, useFacets, useMapPoints, useMapStates, useStats } from '@/api/queries'
@@ -12,7 +12,7 @@ import { RefreshButton } from '@/components/shipment/RefreshButton'
 import { ShipmentDrawer } from '@/components/shipment/ShipmentDrawer'
 import { dataFilters, filtersToParams } from '@/lib/filters'
 import { useFilters } from '@/lib/useFilters'
-import { useUiStore } from '@/stores/uiStore'
+import { useIsDark, useUiStore } from '@/stores/uiStore'
 
 export function MapPage() {
   const { filters, setFilters, reset, params, setParams } = useFilters()
@@ -20,7 +20,13 @@ export function MapPage() {
   const mode = useUiStore((s) => s.mapMode)
   const setMode = useUiStore((s) => s.setMapMode)
   const config = useConfig()
-  const df = dataFilters(filters)
+  const dark = useIsDark()
+  const [problemsOnly, setProblemsOnly] = useState(false)
+  const df = useMemo(() => {
+    const base = dataFilters(filters)
+    if (!problemsOnly) return base
+    return { ...base, status: ['exception', 'returned'] }
+  }, [filters, problemsOnly])
   const points = useMapPoints(df)
   const states = useMapStates(df)
   const stats = useStats(df)
@@ -62,7 +68,7 @@ export function MapPage() {
       <div className="relative min-h-0 flex-1">
         {config.data && (
           <MapView
-            styleUrl={config.data.map_style_url}
+            styleUrl={dark ? config.data.map_style_url_dark : config.data.map_style_url}
             mode={mode}
             points={points.data}
             states={states.data}
@@ -73,7 +79,7 @@ export function MapPage() {
         )}
         <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2">
           <div className="pointer-events-auto">
-            <MapModeToggle mode={mode} onChange={setMode} />
+            <MapModeToggle mode={mode} onChange={setMode} problemsOnly={problemsOnly} onProblemsOnly={setProblemsOnly} />
           </div>
         </div>
         <div className="pointer-events-none absolute bottom-8 left-3 z-10">
@@ -81,10 +87,10 @@ export function MapPage() {
             <MapLegend mode={mode} counts={stats.data?.by_status} />
           </div>
         </div>
-        {points.isFetching && <div className="absolute right-3 top-14 z-10 rounded bg-panel/90 px-2 py-1 text-[11px] text-muted shadow">Updating…</div>}
+        {points.isFetching && <div className="absolute right-3 top-14 z-10 rounded-control border border-border bg-panel/95 px-2 py-1 text-[11px] text-muted shadow-card">Updating…</div>}
         {total === 0 && !points.isFetching && (
           <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-            <div className="pointer-events-auto rounded-xl border border-border bg-panel/95 px-5 py-4 text-center shadow-lg">
+            <div className="pointer-events-auto rounded-card border border-border bg-panel/95 px-5 py-4 text-center shadow-pop">
               <div className="font-medium">Nothing to show yet</div>
               <div className="mt-1 text-xs text-muted">Upload a spreadsheet with ZIP codes, or clear the filters.</div>
             </div>

@@ -1,25 +1,39 @@
 import { STATUS_ORDER, statusMeta } from '@/lib/status'
 import type { MapMode } from '@/stores/uiStore'
+import { mapPalette } from '@/lib/mapLayers'
+import { useIsDark } from '@/stores/uiStore'
+
+function Swatch({ status }: { status: string }) {
+  const m = statusMeta(status)
+  const color = `var(--st-${m.token.replace('status-', '')})`
+  if (m.marker === 'hollow') return <span className="h-2.5 w-2.5 rounded-full border-2 bg-panel" style={{ borderColor: color }} />
+  if (m.marker === 'ring') return <span className="h-2.5 w-2.5 rounded-full border-[1.5px] border-text" style={{ backgroundColor: color }} />
+  return <span className="h-2.5 w-2.5 rounded-full border border-panel" style={{ backgroundColor: color }} />
+}
 
 export function MapLegend({ mode, counts }: { mode: MapMode; counts?: Record<string, number> }) {
+  const dark = useIsDark()
+  const p = mapPalette(dark)
+  const wrap = 'rounded-card border border-border bg-panel/95 px-3 py-2.5 text-[11px] shadow-pop backdrop-blur'
   if (mode === 'heatmap') {
     return (
-      <div className="rounded-lg border border-border bg-panel/95 px-3 py-2 text-[11px] shadow-md backdrop-blur">
-        <div className="mb-1 font-medium">Density</div>
-        <div className="h-2 w-40 rounded-full" style={{ background: 'linear-gradient(90deg, rgba(45,212,191,0.6), #facc15, #f97316, #dc2626)' }} />
-        <div className="mt-0.5 flex justify-between gap-3 text-muted">
+      <div className={wrap}>
+        <div className="mb-1.5 font-semibold text-text">Density</div>
+        <div className="h-2 w-44 rounded-full" style={{ background: `linear-gradient(90deg, ${p.heat[1]}, ${p.heat[2]}, ${p.heat[3]})` }} />
+        <div className="mt-1 flex justify-between gap-3 text-muted">
           <span>few</span>
-          <span>many · exceptions weigh 2×</span>
+          <span>many</span>
         </div>
+        <div className="mt-1 text-muted">Exceptions and returns weigh double.</div>
       </div>
     )
   }
   if (mode === 'states') {
     return (
-      <div className="rounded-lg border border-border bg-panel/95 px-3 py-2 text-[11px] shadow-md backdrop-blur">
-        <div className="mb-1 font-medium">Shipments per state</div>
-        <div className="h-2 w-40 rounded-full" style={{ background: 'linear-gradient(90deg, rgba(148,163,184,0.15), rgba(45,212,191,0.5), rgba(15,118,110,0.9))' }} />
-        <div className="mt-0.5 flex justify-between gap-3 text-muted">
+      <div className={wrap}>
+        <div className="mb-1.5 font-semibold text-text">Shipments per state</div>
+        <div className="h-2 w-44 rounded-full" style={{ background: `linear-gradient(90deg, ${p.accentRamp[0]}, ${p.accentRamp[2]}, ${p.accentRamp[4]})` }} />
+        <div className="mt-1 flex justify-between gap-3 text-muted">
           <span>0</span>
           <span>200+</span>
         </div>
@@ -28,21 +42,18 @@ export function MapLegend({ mode, counts }: { mode: MapMode; counts?: Record<str
     )
   }
   return (
-    <div className="rounded-lg border border-border bg-panel/95 px-3 py-2 text-[11px] shadow-md backdrop-blur">
-      <div className="mb-1 font-medium">Status</div>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
-        {STATUS_ORDER.map((s) => {
-          const m = statusMeta(s)
-          return (
-            <div key={s} className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full border border-white/70" style={{ backgroundColor: m.color }} />
-              <span>{m.label}</span>
-              {counts && <span className="ml-auto tabular-nums text-muted">{counts[s] ?? 0}</span>}
-            </div>
-          )
-        })}
+    <div className={wrap}>
+      <div className="mb-1.5 font-semibold text-text">Status</div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+        {STATUS_ORDER.map((s) => (
+          <div key={s} className="flex items-center gap-1.5 text-text-2">
+            <Swatch status={s} />
+            <span>{statusMeta(s).label}</span>
+            {counts && <span className="ml-auto tabular-nums text-muted">{counts[s] ?? 0}</span>}
+          </div>
+        ))}
       </div>
-      <div className="mt-1 text-muted">Clusters take the color of their most common status. A red ring means at least one exception inside.</div>
+      <div className="mt-1.5 text-muted">Clusters take their most common status; a red ring means a problem inside.</div>
     </div>
   )
 }

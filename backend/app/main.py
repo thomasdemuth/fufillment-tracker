@@ -17,11 +17,12 @@ from app.security import BasicAuthMiddleware
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, tile_origin: str, extra_connect: list[str]):  # noqa: ANN001
+    def __init__(self, app, tile_origins: list[str], extra_connect: list[str]):  # noqa: ANN001
         super().__init__(app)
-        connect = " ".join(["'self'", tile_origin, *extra_connect])
+        tiles = " ".join(dict.fromkeys(tile_origins))
+        connect = " ".join(["'self'", tiles, *extra_connect])
         self.csp = (
-            f"default-src 'self'; connect-src {connect}; img-src 'self' data: blob: {tile_origin}; "
+            f"default-src 'self'; connect-src {connect}; img-src 'self' data: blob: {tiles}; "
             f"style-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:; "
             f"script-src 'self' 'unsafe-eval'; frame-ancestors 'none'"
         )
@@ -63,7 +64,7 @@ def create_app() -> FastAPI:
     ]
     app.add_middleware(
         SecurityHeadersMiddleware,
-        tile_origin=_origin(settings.map_style_url),
+        tile_origins=[_origin(settings.map_style_url), _origin(settings.map_style_url_dark)],
         extra_connect=extra_connect,
     )
 

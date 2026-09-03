@@ -13,12 +13,12 @@ function MultiSelect({ label, values, options, onChange }: { label: string; valu
     <div className="relative">
       <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)} className={cn(values.length && 'border-accent text-accent')}>
         {label}
-        {values.length > 0 && <span className="rounded bg-accent/15 px-1 text-[10px]">{values.length}</span>}
+        {values.length > 0 && <span className="rounded bg-accent-soft px-1 text-[10px]">{values.length}</span>}
       </Button>
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-9 z-30 max-h-72 w-56 overflow-auto rounded-md border border-border bg-panel p-1 shadow-lg">
+          <div className="absolute left-0 top-9 z-30 max-h-72 w-56 overflow-auto rounded-md border border-border bg-panel p-1 shadow-pop">
             {options.length === 0 && <div className="px-2 py-1.5 text-xs text-muted">No options</div>}
             {options.map((o) => {
               const checked = values.includes(o.value)
@@ -117,7 +117,7 @@ export function FilterBar({
         )}
       </div>
       {more && (
-        <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-panel-2/60 p-2 text-xs">
+        <div className="flex flex-wrap items-end gap-3 rounded-control border border-border bg-panel-2/60 p-2 text-xs">
           <Field label="City">
             <Input value={filters.city ?? ''} onChange={(e) => setFilters({ city: e.target.value || undefined })} className="h-8 w-36" placeholder="contains…" />
           </Field>

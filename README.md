@@ -12,6 +12,7 @@ sent, straight to USPS or FedEx, and only when you click Refresh.
 | Map | Shipment | Attention |
 |---|---|---|
 | ![Map](docs/map.png) | ![Shipment](docs/shipment.png) | ![Attention](docs/attention.png) |
+| ![Heatmap](docs/heatmap.png) | ![Dark mode](docs/board-dark.png) | |
 
 ## Quick start (Docker)
 
@@ -128,17 +129,27 @@ Credentials can also be supplied through environment variables (`USPS_CLIENT_ID`
 - Uploaded spreadsheets are kept in `data/uploads/` so an upload can be inspected or re-parsed; they are deleted with the
   upload or with **Wipe all data**.
 
-## Fully offline maps (optional)
+## The map basemap
 
-The default basemap is OpenFreeMap's public vector tiles. To run with no internet at all:
+The map uses OpenFreeMap's free public vector tiles: the quiet **Positron** style in light mode and **Fiord** in dark
+mode. Nothing needs to be configured; tile requests only reveal the area you are looking at. You can point either
+theme at any MapLibre style URL under **Settings → General** or with `MAP_STYLE_URL` / `MAP_STYLE_URL_DARK`.
+
+**If the map is grey with a "Basemap unavailable" banner:** the browser could not reach the tile host. Your shipments
+still render on a blank background. Check the internet connection, a corporate proxy or ad blocker
+(`tiles.openfreemap.org` must be allowed), then click Retry. The screenshots in this README were taken in a sandbox
+without tile access, which is why they show the blank background.
+
+### Fully offline maps (optional)
+
+To run with no internet at all:
 
 1. Download a PMTiles basemap for your region (for example from [Protomaps builds](https://maps.protomaps.com/builds/),
    a US extract is roughly 1–2 GB) into `data/tiles/basemap.pmtiles`.
 2. Serve it locally with any static server that supports HTTP range requests (or `pmtiles serve`), and create a style
    JSON that points at it (Protomaps publishes ready-made styles).
-3. Set `MAP_STYLE_URL` in `.env` (or **Settings → General → Basemap style URL**) to your style's URL.
-
-If the tile host is unreachable, the map falls back to a blank background so your data still renders.
+3. Set `MAP_STYLE_URL` (and `MAP_STYLE_URL_DARK`) in `.env`, or **Settings → General → Basemap style URL**, to your
+   style's URL.
 
 ## Configuration
 
@@ -152,7 +163,8 @@ All options live in `.env` (see `.env.example`):
 | `APP_SECRET_KEY` | auto | Key used to encrypt stored secrets |
 | `USPS_CLIENT_ID` / `USPS_CLIENT_SECRET` | unset | USPS credentials via env (override Settings) |
 | `FEDEX_API_KEY` / `FEDEX_SECRET_KEY` | unset | FedEx credentials via env (override Settings) |
-| `MAP_STYLE_URL` | OpenFreeMap liberty | MapLibre style URL for the basemap |
+| `MAP_STYLE_URL` | OpenFreeMap positron | MapLibre style URL for the light basemap |
+| `MAP_STYLE_URL_DARK` | OpenFreeMap fiord | MapLibre style URL for the dark basemap |
 
 ## Development
 
@@ -176,6 +188,14 @@ make docker-build    # build the production image
 API docs are served at http://localhost:8000/api/docs.
 
 ### Design notes
+
+- **Visual system.** Warm paper surfaces, near-black ink, one deep blue-green accent, Inter (self-hosted). Every color
+  is a token in `frontend/src/index.css`; components never use raw Tailwind colors. Status colors are validated for
+  colorblind separation on the map (returned shares the exception hue and is drawn hollow; out-for-delivery gets an
+  ink ring) and always appear with a label or icon elsewhere.
+- **Progress stepper.** `frontend/src/components/shipment/ProgressStepper.tsx` derives the four-step progress
+  (label → transit → out for delivery → delivered) from the shipment status and its events, with exceptions and
+  returns shown as a red branch at the step where they happened.
 
 - **Status mapping** lives in `backend/app/services/status_map.py` as plain tables, so adjusting how a carrier code maps
   to a normalized status is a one-line change with a parametrized test.

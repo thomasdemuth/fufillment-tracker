@@ -14,9 +14,9 @@ import { useFilters } from '@/lib/useFilters'
 import { cn } from '@/lib/utils'
 
 const GROUPS: { key: string; title: string; reasons: string[]; tone: string }[] = [
-  { key: 'exceptions', title: 'Exceptions and returns', reasons: ['exception', 'returned', 'delivery_failed'], tone: 'text-red-600' },
-  { key: 'pickup', title: 'Waiting for pickup', reasons: ['pickup'], tone: 'text-amber-600' },
-  { key: 'stuck', title: 'No movement', reasons: ['stuck_pre_transit', 'stuck_in_transit'], tone: 'text-amber-600' },
+  { key: 'exceptions', title: 'Exceptions and returns', reasons: ['exception', 'returned', 'delivery_failed'], tone: 'text-danger' },
+  { key: 'pickup', title: 'Waiting for pickup', reasons: ['pickup'], tone: 'text-status-ofd' },
+  { key: 'stuck', title: 'No movement', reasons: ['stuck_pre_transit', 'stuck_in_transit'], tone: 'text-status-ofd' },
   { key: 'errors', title: 'Tracking errors', reasons: ['poll_errors'], tone: 'text-muted' },
   { key: 'geo', title: 'Not on the map', reasons: ['not_geocoded'], tone: 'text-muted' },
 ]
@@ -54,7 +54,7 @@ export function AttentionPage() {
       <div className="flex-1 overflow-auto p-4">
         {q.data && rows.length === 0 && (
           <div className="mx-auto mt-16 max-w-md text-center">
-            <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
+            <CheckCircle2 className="mx-auto h-10 w-10 text-status-delivered" />
             <h2 className="mt-3 text-base font-semibold">All clear</h2>
             <p className="mt-1 text-sm text-muted">Nothing needs a look right now. Shipments appear here after a refresh flags an exception, a return, a pickup, or a long silence.</p>
           </div>
@@ -90,7 +90,7 @@ export function AttentionPage() {
 
 function AttentionCard({ r, onClick, active }: { r: AttentionRow; onClick: () => void; active: boolean }) {
   return (
-    <button onClick={onClick} className={cn('rounded-xl border border-border bg-panel p-3 text-left shadow-sm transition-colors hover:bg-panel-2', active && 'border-accent')}>
+    <button onClick={onClick} className={cn('rounded-card border border-border bg-panel p-3 text-left shadow-card transition-colors hover:bg-panel-2', active && 'border-accent')}>
       <div className="flex items-center justify-between gap-2">
         <StatusBadge status={r.status} />
         <CarrierBadge carrier={r.carrier} confidence={r.carrier_confidence} />

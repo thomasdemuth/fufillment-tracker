@@ -13,6 +13,7 @@ DEFAULTS: dict[str, Any] = {
     "geocoder_api_key_enc": None,
     "nominatim_email": None,
     "map_style_url": None,
+    "map_style_url_dark": None,
 }
 
 

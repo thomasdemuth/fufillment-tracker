@@ -27,7 +27,7 @@ export function SettingsPage() {
     <>
       <PageHeader title="Settings" subtitle="Carrier credentials, geocoding, and app options. Secrets are encrypted on disk." />
       <div className="flex-1 overflow-auto p-5">
-        <div className="mb-4 inline-flex rounded-lg border border-border bg-panel p-0.5">
+        <div className="mb-4 inline-flex rounded-control border border-border bg-panel p-0.5">
           {(['carriers', 'geocoding', 'general'] as Tab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)} className={cn('rounded-md px-3 py-1.5 text-sm capitalize', tab === t ? 'bg-accent text-accent-fg' : 'text-muted hover:text-text')}>
               {t}
@@ -155,7 +155,7 @@ function CarrierCard({ c }: { c: CarrierSettings }) {
           <div className="text-xs text-muted">
             {c.last_check_at ? (
               <span className="inline-flex items-center gap-1">
-                {c.last_check_ok ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-red-500" />}
+                {c.last_check_ok ? <CheckCircle2 className="h-3.5 w-3.5 text-status-delivered" /> : <XCircle className="h-3.5 w-3.5 text-danger" />}
                 {c.last_check_message} · {fmtRelative(c.last_check_at)}
               </span>
             ) : (
@@ -178,10 +178,10 @@ function CarrierCard({ c }: { c: CarrierSettings }) {
 
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
-    ok: 'bg-emerald-500/15 text-emerald-600',
-    mock: 'bg-sky-500/15 text-sky-600',
-    error: 'bg-red-500/15 text-red-600',
-    unconfigured: 'bg-amber-500/15 text-amber-600',
+    ok: 'bg-status-delivered/15 text-status-delivered',
+    mock: 'bg-accent-soft text-accent',
+    error: 'bg-danger-soft text-danger',
+    unconfigured: 'bg-status-ofd/15 text-text',
     disabled: 'bg-panel-2 text-muted',
   }
   return <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-medium', map[status] ?? map.disabled)}>{status}</span>
@@ -214,7 +214,7 @@ function GeocodingTab() {
       <Card>
         <CardHeader>
           <CardTitle>Offline geocoding (default)</CardTitle>
-          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-600">always on</span>
+          <span className="rounded-full bg-status-delivered/15 px-2 py-0.5 text-[11px] font-medium text-status-delivered">always on</span>
         </CardHeader>
         <CardBody className="text-sm text-muted">
           Every shipment is placed at the center of its ZIP code using a bundled database of US ZIP codes. Nothing leaves this machine. If a ZIP is missing, the city or state center is used instead. This is accurate enough for heatmaps and regional views.
@@ -275,11 +275,13 @@ function GeneralTab() {
   const [stuck, setStuck] = useState(7)
   const [origin, setOrigin] = useState('')
   const [style, setStyle] = useState('')
+  const [styleDark, setStyleDark] = useState('')
   useEffect(() => {
     if (q.data) {
       setStuck(q.data.stuck_days ?? 7)
       setOrigin(q.data.origin_postal_code ?? '')
       setStyle(q.data.map_style_url ?? '')
+      setStyleDark(q.data.map_style_url_dark ?? '')
     }
   }, [q.data])
   return (
@@ -306,8 +308,12 @@ function GeneralTab() {
         </CardHeader>
         <CardBody className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <Label>Basemap style URL (leave empty for the default OpenFreeMap style; see README for a fully offline PMTiles setup)</Label>
-            <Input value={style} onChange={(e) => setStyle(e.target.value)} placeholder="https://tiles.openfreemap.org/styles/liberty" />
+            <Label>Basemap style URL, light theme (empty = OpenFreeMap Positron; see README for a fully offline PMTiles setup)</Label>
+            <Input value={style} onChange={(e) => setStyle(e.target.value)} placeholder="https://tiles.openfreemap.org/styles/positron" />
+          </label>
+          <label className="flex flex-col gap-1">
+            <Label>Basemap style URL, dark theme (empty = OpenFreeMap Fiord)</Label>
+            <Input value={styleDark} onChange={(e) => setStyleDark(e.target.value)} placeholder="https://tiles.openfreemap.org/styles/fiord" />
           </label>
         </CardBody>
       </Card>
@@ -315,7 +321,7 @@ function GeneralTab() {
         <Button
           onClick={async () => {
             try {
-              await save.mutateAsync({ stuck_days: stuck, origin_postal_code: origin || null, map_style_url: style || null })
+              await save.mutateAsync({ stuck_days: stuck, origin_postal_code: origin || null, map_style_url: style || null, map_style_url_dark: styleDark || null })
               toast.success('Saved')
             } catch (e) {
               toast.error((e as Error).message)

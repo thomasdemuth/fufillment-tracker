@@ -1,6 +1,7 @@
 {
   "version": 8,
   "name": "Blank (offline fallback)",
+  "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   "sources": {},
-  "layers": [{ "id": "background", "type": "background", "paint": { "background-color": "#dfe5ec" } }]
+  "layers": [{ "id": "background", "type": "background", "paint": { "background-color": "#ebe7de" } }]
 }

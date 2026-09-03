@@ -1,24 +1,29 @@
-import { clusterColorExpression, clusterProperties, pointLayer, statusColorExpression } from './mapLayers'
+import { clusterColorExpression, clusterProperties, mapPalette, pointLayer, statusColorExpression } from './mapLayers'
 import { STATUS_ORDER } from './status'
 
 describe('map layer builders', () => {
+  const p = mapPalette(false)
   it('creates one cluster counter per status plus hot', () => {
-    const p = clusterProperties()
-    for (const s of STATUS_ORDER) expect(p[s]).toBeDefined()
-    expect(p.hot).toBeDefined()
+    const c = clusterProperties()
+    for (const s of STATUS_ORDER) expect(c[s]).toBeDefined()
+    expect(c.hot).toBeDefined()
   })
   it('status color expression is a match on s', () => {
-    const e = statusColorExpression() as unknown[]
+    const e = statusColorExpression(p) as unknown[]
     expect(e[0]).toBe('match')
     expect(e[1]).toEqual(['get', 's'])
     expect(e.length).toBe(2 + STATUS_ORDER.length * 2 + 1)
   })
-  it('cluster color is an argmax over statuses starting with exception', () => {
-    const e = clusterColorExpression() as unknown[]
+  it('cluster color is an argmax case chain', () => {
+    const e = clusterColorExpression(p) as unknown[]
     expect(e[0]).toBe('case')
-    expect(JSON.stringify(e[1])).toContain('"exception"')
   })
-  it('point layer excludes clusters', () => {
-    expect(pointLayer().filter).toEqual(['!', ['has', 'point_count']])
+  it('point layer excludes clusters and draws returned hollow', () => {
+    const l = pointLayer(p)
+    expect(l.filter).toEqual(['!', ['has', 'point_count']])
+    expect(JSON.stringify(l.paint)).toContain('returned')
+  })
+  it('dark palette differs from light', () => {
+    expect(mapPalette(true).status.in_transit).not.toBe(p.status.in_transit)
   })
 })

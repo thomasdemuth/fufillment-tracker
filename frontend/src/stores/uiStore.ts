@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { create } from 'zustand'
 
 export type Theme = 'light' | 'dark' | 'system'
@@ -23,10 +24,27 @@ function readMapMode(): MapMode {
   return 'points'
 }
 
+export function resolveDark(theme: Theme): boolean {
+  const prefersDark = typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-color-scheme: dark)').matches
+  return theme === 'dark' || (theme === 'system' && prefersDark)
+}
+
 export function applyTheme(theme: Theme) {
-  const prefersDark = typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches
-  const dark = theme === 'dark' || (theme === 'system' && prefersDark)
-  document.documentElement.classList.toggle('dark', dark)
+  document.documentElement.classList.toggle('dark', resolveDark(theme))
+}
+
+/** True when the dark class is active; tracks theme changes and the OS setting. */
+export function useIsDark(): boolean {
+  const theme = useUiStore((s) => s.theme)
+  const [dark, setDark] = useState(() => resolveDark(theme))
+  useEffect(() => {
+    setDark(resolveDark(theme))
+    const mq = window.matchMedia?.('(prefers-color-scheme: dark)')
+    const onChange = () => setDark(resolveDark(useUiStore.getState().theme))
+    mq?.addEventListener('change', onChange)
+    return () => mq?.removeEventListener('change', onChange)
+  }, [theme])
+  return dark
 }
 
 interface UiState {

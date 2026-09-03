@@ -57,7 +57,7 @@ export function UploadsPage() {
                     {u.sheet_name ? ` · sheet "${u.sheet_name}"` : ''}
                   </div>
                 </div>
-                <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase', u.status === 'committed' ? 'bg-emerald-500/15 text-emerald-600' : 'bg-amber-500/15 text-amber-600')}>
+                <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase', u.status === 'committed' ? 'bg-status-delivered/15 text-status-delivered' : 'bg-status-ofd/15 text-text')}>
                   {u.status}
                 </span>
               </div>
@@ -68,8 +68,8 @@ export function UploadsPage() {
                 <Stat label="Skipped" value={u.skipped_count} warn={u.skipped_count > 0} />
               </div>
               {u.errors && u.errors.length > 0 && (
-                <details className="mx-4 mb-2 rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-[11px]">
-                  <summary className="cursor-pointer text-amber-700 dark:text-amber-300">{u.errors.length} row problem{u.errors.length > 1 ? 's' : ''}</summary>
+                <details className="mx-4 mb-2 rounded border border-status-ofd/40 bg-status-ofd/5 px-2 py-1 text-[11px]">
+                  <summary className="cursor-pointer text-text">{u.errors.length} row problem{u.errors.length > 1 ? 's' : ''}</summary>
                   <ul className="mt-1 max-h-32 overflow-auto font-mono">
                     {(u.errors as { row: number; error: string }[]).map((e, i) => (
                       <li key={i}>
@@ -83,7 +83,7 @@ export function UploadsPage() {
                 <Button variant="ghost" size="sm" onClick={() => navigate(`/board?upload_id=${u.id}`)} disabled={u.status !== 'committed'}>
                   View {u.shipment_count} shipments
                 </Button>
-                <Button variant="ghost" size="sm" className="text-muted hover:text-red-600" onClick={() => onDelete(u.id, u.filename)}>
+                <Button variant="ghost" size="sm" className="text-muted hover:text-danger" onClick={() => onDelete(u.id, u.filename)}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -98,7 +98,7 @@ export function UploadsPage() {
 function Stat({ label, value, warn, title }: { label: string; value: number; warn?: boolean; title?: string }) {
   return (
     <div title={title}>
-      <div className={cn('text-lg font-semibold tabular-nums', warn && 'text-amber-600')}>{value}</div>
+      <div className={cn('text-lg font-semibold tabular-nums', warn && 'text-status-ofd')}>{value}</div>
       <div className="text-[11px] text-muted">{label}</div>
     </div>
   )

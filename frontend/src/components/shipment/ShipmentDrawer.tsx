@@ -19,8 +19,8 @@ export function ShipmentDrawer({ id, onClose }: { id: number | null; onClose: ()
   if (id == null) return null
   return (
     <>
-      <div className="fixed inset-0 z-30 bg-black/20" onClick={onClose} />
-      <aside className="fixed bottom-0 right-0 top-0 z-40 flex w-full max-w-[560px] flex-col border-l border-border bg-panel shadow-2xl" role="dialog" aria-label="Shipment details">
+      <div className="fixed inset-0 z-30 bg-text/20" onClick={onClose} />
+      <aside className="fixed bottom-0 right-0 top-0 z-40 flex w-full max-w-[560px] flex-col border-l border-border bg-panel shadow-pop" role="dialog" aria-label="Shipment details">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{q.data?.recipient_name ?? (q.isLoading ? 'Loading…' : 'Shipment')}</div>
@@ -36,7 +36,7 @@ export function ShipmentDrawer({ id, onClose }: { id: number | null; onClose: ()
           </div>
         </div>
         <div className="min-h-0 flex-1 overflow-auto p-4">
-          {q.isError && <div className="text-sm text-red-600">Could not load shipment.</div>}
+          {q.isError && <div className="text-sm text-danger">Could not load shipment.</div>}
           {q.data && <ShipmentDetailBody s={q.data} onDeleted={onClose} />}
         </div>
       </aside>

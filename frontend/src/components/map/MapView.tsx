@@ -11,13 +11,15 @@ import {
   clusterLayer,
   clusterProperties,
   heatmapLayer,
+  mapPalette,
   pointLayer,
   stateFillLayer,
   stateLabelLayer,
   stateLineLayer,
 } from '@/lib/mapLayers'
 import { StatusBadge } from '@/components/ui/status-badge'
-import type { MapMode } from '@/stores/uiStore'
+import { useIsDark, type MapMode } from '@/stores/uiStore'
+import { BasemapBanner, useBasemap } from '@/components/map/useBasemap'
 
 const US_BOUNDS: [[number, number], [number, number]] = [[-125, 24], [-66, 50]]
 const EMPTY: PointCollection = { type: 'FeatureCollection', features: [] }
@@ -35,15 +37,15 @@ export interface MapViewProps {
 
 export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick, selectedId, fitOnData = true }: MapViewProps) {
   const mapRef = useRef<MapRef>(null)
-  const [style, setStyle] = useState<string>(styleUrl)
+  const dark = useIsDark()
+  const p = useMemo(() => mapPalette(dark), [dark])
+  const basemap = useBasemap(styleUrl)
   const [loaded, setLoaded] = useState(false)
   const [hover, setHover] = useState<{ lng: number; lat: number; props: Record<string, unknown> } | null>(null)
   const [hoverState, setHoverState] = useState<string | null>(null)
   const fittedRef = useRef(false)
   const cluster = useMemo(() => clusterProperties(), [])
   const data = points ?? EMPTY
-
-  useEffect(() => setStyle(styleUrl), [styleUrl])
 
   // Fit to data on first load
   useEffect(() => {
@@ -136,9 +138,11 @@ export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick
   const interactive = mode === 'states' ? ['state-fill'] : mode === 'points' ? ['clusters', 'points'] : ['points']
 
   return (
+    <>
+    <BasemapBanner state={basemap} />
     <Map
       ref={mapRef}
-      mapStyle={style}
+      mapStyle={basemap.style}
       initialViewState={{ bounds: US_BOUNDS, fitBoundsOptions: { padding: 40 } }}
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={interactive}
@@ -146,11 +150,7 @@ export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick
       onMouseMove={onMouseMove}
       onMouseLeave={() => setHover(null)}
       onLoad={() => setLoaded(true)}
-      onError={(e) => {
-        // Tile/style unreachable (offline?) -> fall back to a blank basemap so data still renders.
-        const msg = String((e as { error?: { message?: string } }).error?.message ?? '')
-        if (style !== '/geo/blank-style.json' && /style|Failed to fetch|NetworkError|403|404/i.test(msg)) setStyle('/geo/blank-style.json')
-      }}
+      onError={(e) => basemap.onError(String((e as { error?: { message?: string } }).error?.message ?? ''))}
       attributionControl={{ compact: true }}
       reuseMaps
     >
@@ -158,37 +158,37 @@ export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick
       <ScaleControl position="bottom-left" unit="imperial" />
 
       <Source id={SRC_STATES} type="geojson" data="/geo/us-states.geojson" promoteId="postal">
-        <Layer {...stateFillLayer()} layout={{ visibility: mode === 'states' ? 'visible' : 'none' }} />
-        <Layer {...stateLineLayer()} layout={{ visibility: mode === 'states' ? 'visible' : 'none' }} />
-        <Layer {...stateLabelLayer()} layout={{ ...stateLabelLayer().layout, visibility: mode === 'states' ? 'visible' : 'none' }} />
+        <Layer {...stateFillLayer(p)} layout={{ visibility: mode === 'states' ? 'visible' : 'none' }} />
+        <Layer {...stateLineLayer(p)} layout={{ visibility: mode === 'states' ? 'visible' : 'none' }} />
+        <Layer {...stateLabelLayer(p)} layout={{ ...stateLabelLayer(p).layout, visibility: mode === 'states' ? 'visible' : 'none' }} />
       </Source>
 
       <Source id={SRC_RAW} type="geojson" data={data}>
-        <Layer {...heatmapLayer()} layout={{ visibility: mode === 'heatmap' ? 'visible' : 'none' }} />
+        <Layer {...heatmapLayer(p)} layout={{ visibility: mode === 'heatmap' ? 'visible' : 'none' }} />
       </Source>
 
       <Source id={SRC_POINTS} type="geojson" data={data} cluster={mode === 'points'} clusterRadius={45} clusterMaxZoom={13} clusterProperties={cluster}>
-        <Layer {...clusterLayer()} layout={{ visibility: mode === 'points' ? 'visible' : 'none' }} />
-        <Layer {...clusterCountLayer()} layout={{ ...clusterCountLayer().layout, visibility: mode === 'points' ? 'visible' : 'none' }} />
+        <Layer {...clusterLayer(p)} layout={{ visibility: mode === 'points' ? 'visible' : 'none' }} />
+        <Layer {...clusterCountLayer(p)} layout={{ ...clusterCountLayer(p).layout, visibility: mode === 'points' ? 'visible' : 'none' }} />
         <Layer
-          {...pointLayer()}
+          {...pointLayer(p)}
           layout={{ visibility: mode === 'states' ? 'none' : 'visible' }}
-          paint={{ ...pointLayer().paint, 'circle-opacity': mode === 'heatmap' ? 0.35 : 0.9 }}
+          paint={{ ...pointLayer(p).paint, 'circle-opacity': mode === 'heatmap' ? 0.35 : 0.95 }}
         />
       </Source>
 
       {selectedId != null && (
         <Source id="selected" type="geojson" data={{ type: 'FeatureCollection', features: data.features.filter((f: PointFeature) => f.properties.id === selectedId) }}>
-          <Layer id="selected-ring" type="circle" paint={{ 'circle-radius': 12, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#0f766e', 'circle-stroke-width': 3 }} />
+          <Layer id="selected-ring" type="circle" paint={{ 'circle-radius': 12, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': p.accent, 'circle-stroke-width': 3 }} />
         </Source>
       )}
 
       {hover && (
         <Popup longitude={hover.lng} latitude={hover.lat} closeButton={false} closeOnClick={false} offset={10} anchor="bottom">
-          <div className="text-xs">
-            <div className="font-medium">{String(hover.props.n ?? 'Unknown recipient')}</div>
+          <div className="text-[12px]">
+            <div className="font-semibold text-text">{String(hover.props.n ?? 'Unknown recipient')}</div>
             <div className="text-muted">{String(hover.props.pl ?? '')}</div>
-            <div className="mt-1 flex items-center gap-2">
+            <div className="mt-1.5 flex items-center gap-2">
               <StatusBadge status={String(hover.props.s)} />
               <span className="font-mono text-[10px] text-muted">{String(hover.props.t)}</span>
             </div>
@@ -196,5 +196,6 @@ export function MapView({ styleUrl, mode, points, states, onSelect, onStateClick
         </Popup>
       )}
     </Map>
+    </>
   )
 }

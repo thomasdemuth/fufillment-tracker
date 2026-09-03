@@ -52,7 +52,7 @@ export function BoardPage() {
           onAttention={() => navigate('/attention')}
         />
         <FilterBar filters={filters} setFilters={setFilters} reset={reset} facets={facets.data} />
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-panel shadow-sm">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-card border border-border bg-panel shadow-card">
           <ShipmentTable
             rows={shipments.data?.items ?? []}
             sort={filters.sort}

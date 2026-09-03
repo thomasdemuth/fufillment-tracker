@@ -1,19 +1,22 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { AlertTriangle, ExternalLink, MapPin, Pencil, RefreshCw, Trash2 } from 'lucide-react'
+import { ExternalLink, MapPin, Pencil, RefreshCw, Trash2 } from 'lucide-react'
 import { useConfig, useDeleteShipment, usePatchShipment, useRefreshShipment, useShipmentPath, type ShipmentDetail } from '@/api/queries'
 import { TransitPathMap } from '@/components/map/TransitPathMap'
 import { Button } from '@/components/ui/button'
 import { Input, Label, Select } from '@/components/ui/input'
 import { CarrierBadge, StatusBadge } from '@/components/ui/status-badge'
 import { Timeline } from '@/components/shipment/Timeline'
+import { ProgressStepper } from '@/components/shipment/ProgressStepper'
+import { SectionLabel } from '@/components/ui/card'
 import { NotesPanel } from '@/components/shipment/NotesPanel'
 import { TagPicker } from '@/components/shipment/TagPicker'
-import { fmtDate, fmtDays, fmtRelative } from '@/lib/format'
-import { ATTENTION_REASONS } from '@/lib/status'
+import { fmtDate, fmtDays } from '@/lib/format'
+import { useIsDark } from '@/stores/uiStore'
 
 export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDeleted?: () => void }) {
   const config = useConfig()
+  const dark = useIsDark()
   const path = useShipmentPath(s.id)
   const refresh = useRefreshShipment()
   const patch = usePatchShipment()
@@ -38,45 +41,31 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
 
   return (
     <div className="flex flex-col gap-5">
-      {/* header block */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={s.status} size="md" />
-            <CarrierBadge carrier={s.carrier} confidence={s.carrier_confidence} />
-            {s.attention_flag && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300">
-                <AlertTriangle className="h-3 w-3" /> {ATTENTION_REASONS[s.attention_flag] ?? s.attention_flag}
-              </span>
-            )}
-          </div>
-          <div className="mt-1.5 text-sm">{s.status_raw ?? 'No status yet'}</div>
-          <div className="text-[11px] text-muted">
-            {s.last_event_at ? `Last event ${fmtRelative(s.last_event_at)}${s.last_event_place ? ` in ${s.last_event_place}` : ''}` : 'No events yet'}
-            {s.last_polled_at ? ` · checked ${fmtRelative(s.last_polled_at)}` : ' · never checked'}
-          </div>
-          {s.poll_last_error && <div className="mt-1 text-[11px] text-red-600">{s.poll_last_error}</div>}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Button size="sm" variant="outline" onClick={onRefresh} disabled={refresh.isPending}>
-            <RefreshCw className={`h-3.5 w-3.5 ${refresh.isPending ? 'animate-spin' : ''}`} /> Refresh
-          </Button>
-          {s.carrier_url && (
-            <Button size="sm" onClick={() => window.open(s.carrier_url!, '_blank', 'noopener')}>
-              <ExternalLink className="h-3.5 w-3.5" /> Open on {s.carrier === 'usps' ? 'USPS' : 'FedEx'}
+      <ProgressStepper
+        shipment={s}
+        actions={
+          <>
+            <Button size="sm" variant="outline" onClick={onRefresh} disabled={refresh.isPending}>
+              <RefreshCw className={`h-3.5 w-3.5 ${refresh.isPending ? 'animate-spin' : ''}`} /> Refresh
             </Button>
-          )}
-        </div>
-      </div>
+            {s.carrier_url && (
+              <Button size="sm" onClick={() => window.open(s.carrier_url!, '_blank', 'noopener')}>
+                <ExternalLink className="h-3.5 w-3.5" /> {s.carrier === 'usps' ? 'USPS' : 'FedEx'}
+              </Button>
+            )}
+          </>
+        }
+      />
+      {s.poll_last_error && <div className="rounded-control border border-danger/30 bg-danger-soft px-3 py-2 text-[12px] text-danger">{s.poll_last_error}</div>}
 
       {/* key facts */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg border border-border bg-panel-2/50 p-3 text-xs sm:grid-cols-4">
-        <Fact label="Tracking" value={<span className="select-all font-mono">{s.tracking_number}</span>} />
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 rounded-card border border-border bg-panel-2/50 p-3 text-[12px] sm:grid-cols-4">
+        <Fact label="Status" value={<StatusBadge status={s.status} />} />
+        <Fact label="Tracking" value={<span className="inline-flex items-center gap-1.5"><CarrierBadge carrier={s.carrier} confidence={s.carrier_confidence} /><span className="select-all truncate font-mono text-[11.5px]" title={s.tracking_number}>{s.tracking_number}</span></span>} />
         <Fact label="Order" value={s.order_ref ?? '—'} />
         <Fact label="Shipped" value={fmtDate(s.ship_date)} />
         <Fact label="Days in transit" value={fmtDays(s.days_in_transit)} />
         <Fact label="Expected" value={fmtDate(s.expected_delivery)} />
-        <Fact label="Delivered" value={fmtDate(s.delivered_at, true)} />
         <Fact label="Origin ZIP" value={s.origin_postal_code ?? '—'} />
         <Fact label="Map placement" value={s.geocode_precision === 'none' ? 'not placed' : `${s.geocode_precision} level`} />
       </div>
@@ -84,7 +73,7 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
       {/* recipient */}
       <section>
         <div className="mb-1.5 flex items-center justify-between">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">Recipient</h3>
+          <SectionLabel>Recipient</SectionLabel>
           <Button variant="ghost" size="sm" onClick={() => setEditing((e) => !e)}>
             <Pencil className="h-3.5 w-3.5" /> {editing ? 'Cancel' : 'Edit'}
           </Button>
@@ -124,15 +113,15 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
 
       {/* map */}
       <section>
-        <h3 className="mb-1.5 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted">
+        <SectionLabel className="mb-1.5 flex items-center gap-1">
           <MapPin className="h-3.5 w-3.5" /> Transit path
-        </h3>
-        {config.data && <TransitPathMap styleUrl={config.data.map_style_url} path={path.data} />}
+        </SectionLabel>
+        {config.data && <TransitPathMap styleUrl={dark ? config.data.map_style_url_dark : config.data.map_style_url} path={path.data} />}
         <div className="mt-1 text-[11px] text-muted">Scan locations are placed at city/ZIP centers. Dashed line = remaining leg to the destination.</div>
       </section>
 
       <section>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">History</h3>
+        <SectionLabel className="mb-2">History</SectionLabel>
         <Timeline events={s.events} />
       </section>
 
@@ -142,7 +131,7 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
         <div>
           From {s.uploads.map((u) => `${u.filename} (row ${u.row_number})`).join(', ') || 'manual entry'}
         </div>
-        <Button variant="ghost" size="sm" className="text-muted hover:text-red-600" onClick={onDelete}>
+        <Button variant="ghost" size="sm" className="text-muted hover:text-danger" onClick={onDelete}>
           <Trash2 className="h-3.5 w-3.5" /> Delete
         </Button>
       </section>
@@ -153,8 +142,8 @@ export function ShipmentDetailBody({ s, onDeleted }: { s: ShipmentDetail; onDele
 function Fact({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="min-w-0">
-      <div className="text-[10px] uppercase tracking-wide text-muted">{label}</div>
-      <div className="truncate">{value}</div>
+      <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-muted">{label}</div>
+      <div className="mt-0.5 truncate text-text">{value}</div>
     </div>
   )
 }
