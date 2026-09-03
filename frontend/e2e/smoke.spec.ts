@@ -3,9 +3,10 @@
  * Uploads the demo spreadsheets through the UI, refreshes, and walks every main screen.
  */
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { expect, test } from '@playwright/test'
 
-const DEMO = path.resolve(__dirname, '../../demo')
+const DEMO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../demo')
 
 test.describe.configure({ mode: 'serial' })
 
@@ -71,12 +72,13 @@ test('attention, settings, privacy pages load', async ({ page }) => {
   await page.goto('/settings')
   await expect(page.getByText('USPS', { exact: true })).toBeVisible()
   await page.goto('/privacy')
-  await expect(page.getByText('What leaves this machine')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'What leaves this machine' })).toBeVisible()
 })
 
 test('command palette finds shipments', async ({ page }) => {
   await page.goto('/board')
-  await page.keyboard.press('Control+k')
+  await expect(page.locator('tbody tr').first()).toBeVisible()
+  await page.getByRole('button', { name: /Search/ }).click()
   await page.getByPlaceholder(/Search shipments/).fill('ORD-01')
   await expect(page.locator('[cmdk-item]').first()).toBeVisible()
 })
