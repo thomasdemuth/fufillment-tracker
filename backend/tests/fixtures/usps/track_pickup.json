@@ -1,0 +1,10 @@
+{
+  "trackingNumber": "9400111899223197428491",
+  "status": "Available for Pickup",
+  "statusCategory": "Available for Pickup",
+  "destinationZIP": "80202",
+  "trackingEvents": [
+    {"eventType": "Available for Pickup", "eventCode": "16", "eventTimestamp": "2026-08-21T09:00:00", "eventCity": "DENVER", "eventState": "CO", "eventZIP": "80202"},
+    {"eventType": "Notice Left (No Authorized Recipient Available)", "eventCode": "02", "eventTimestamp": "2026-08-20T14:00:00", "eventCity": "DENVER", "eventState": "CO", "eventZIP": "80202"}
+  ]
+}

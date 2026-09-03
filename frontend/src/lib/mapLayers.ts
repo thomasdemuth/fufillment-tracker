@@ -20,9 +20,9 @@ export function statusColorExpression(): ExpressionSpecification {
   return ['match', ['get', 's'], ...pairs, STATUS_META.unknown.color] as unknown as ExpressionSpecification
 }
 
-/** Color of a cluster: exception if any exception inside; otherwise the status with the highest count. */
+/** Color of a cluster: the status with the highest count (ties resolved in priority order). */
 export function clusterColorExpression(): ExpressionSpecification {
-  const order: Status[] = ['out_for_delivery', 'in_transit', 'label_created', 'delivered', 'returned', 'unknown']
+  const order: Status[] = ['exception', 'out_for_delivery', 'in_transit', 'label_created', 'delivered', 'returned', 'unknown']
   // Build nested: if hot>0 -> red; else pick argmax over order via chained case comparisons.
   const argmax = (cands: Status[]): ExpressionSpecification => {
     if (cands.length === 1) return STATUS_META[cands[0]].color as unknown as ExpressionSpecification
@@ -30,7 +30,12 @@ export function clusterColorExpression(): ExpressionSpecification {
     const geAll: ExpressionSpecification = ['all', ...rest.map((r) => ['>=', ['get', head], ['get', r]] as ExpressionSpecification)]
     return ['case', geAll, STATUS_META[head].color, argmax(rest)] as ExpressionSpecification
   }
-  return ['case', ['>', ['get', 'hot'], 0], STATUS_META.exception.color, argmax(order)] as ExpressionSpecification
+  return argmax(order)
+}
+
+/** Stroke of a cluster: red ring when it contains at least one exception. */
+export function clusterStrokeExpression(): ExpressionSpecification {
+  return ['case', ['>', ['get', 'hot'], 0], STATUS_META.exception.color, '#ffffff'] as ExpressionSpecification
 }
 
 export function clusterLayer(): CircleLayerSpecification {
@@ -43,8 +48,8 @@ export function clusterLayer(): CircleLayerSpecification {
       'circle-color': clusterColorExpression(),
       'circle-opacity': 0.85,
       'circle-radius': ['interpolate', ['linear'], ['get', 'point_count'], 2, 14, 10, 18, 50, 24, 200, 32, 1000, 40],
-      'circle-stroke-width': 2,
-      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': ['case', ['>', ['get', 'hot'], 0], 3, 2],
+      'circle-stroke-color': clusterStrokeExpression(),
     },
   }
 }

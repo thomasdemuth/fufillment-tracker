@@ -199,6 +199,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shipments/{shipment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Shipment */
+        get: operations["get_shipment_api_shipments__shipment_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Shipment */
+        delete: operations["delete_shipment_api_shipments__shipment_id__delete"];
+        options?: never;
+        head?: never;
+        /** Patch Shipment */
+        patch: operations["patch_shipment_api_shipments__shipment_id__patch"];
+        trace?: never;
+    };
+    "/api/shipments/{shipment_id}/path.geojson": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Shipment Path
+         * @description Origin -> scan locations (chronological, deduped by place) -> destination, as a FeatureCollection.
+         */
+        get: operations["shipment_path_api_shipments__shipment_id__path_geojson_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shipments/{shipment_id}/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh Shipment */
+        post: operations["refresh_shipment_api_shipments__shipment_id__refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/map/points.geojson": {
         parameters: {
             query?: never;
@@ -227,6 +283,91 @@ export interface paths {
         get: operations["states_api_map_states_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Refresh */
+        post: operations["start_refresh_api_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Jobs */
+        get: operations["list_jobs_api_jobs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current Job */
+        get: operations["current_job_api_jobs_current_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Job */
+        get: operations["get_job_api_jobs__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs/{job_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Job */
+        post: operations["cancel_job_api_jobs__job_id__cancel_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -286,6 +427,33 @@ export interface components {
             /** Geocode Job Id */
             geocode_job_id?: number | null;
         };
+        /** EventOut */
+        EventOut: {
+            /** Id */
+            id: number;
+            /** Event At */
+            event_at: string | null;
+            /** Event At Raw */
+            event_at_raw: string | null;
+            /** Code */
+            code: string | null;
+            /** Description */
+            description: string;
+            /** Normalized Status */
+            normalized_status: string;
+            /** City */
+            city: string | null;
+            /** State */
+            state: string | null;
+            /** Postal Code */
+            postal_code: string | null;
+            /** Country */
+            country: string | null;
+            /** Lat */
+            lat: number | null;
+            /** Lng */
+            lng: number | null;
+        };
         /** Facets */
         Facets: {
             /** States */
@@ -307,6 +475,53 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** JobOut */
+        JobOut: {
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Status */
+            status: string;
+            /** Total */
+            total: number;
+            /** Done */
+            done: number;
+            /** Updated */
+            updated: number;
+            /** Errors */
+            errors: number;
+            /** Message */
+            message: string | null;
+            /** Error Samples */
+            error_samples?: string[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Started At */
+            started_at: string | null;
+            /** Finished At */
+            finished_at: string | null;
+        };
+        /** NoteOut */
+        NoteOut: {
+            /** Id */
+            id: number;
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** Page[ShipmentRow] */
         Page_ShipmentRow_: {
@@ -349,6 +564,171 @@ export interface components {
             created_at: string;
             /** Last Used At */
             last_used_at: string | null;
+        };
+        /** RefreshRequest */
+        RefreshRequest: {
+            /**
+             * All
+             * @default false
+             */
+            all: boolean;
+            /** Shipment Ids */
+            shipment_ids?: number[] | null;
+            /** Filters */
+            filters?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Include Terminal
+             * @default false
+             */
+            include_terminal: boolean;
+        };
+        /** RefreshStarted */
+        RefreshStarted: {
+            /** Job Id */
+            job_id: number | null;
+            /** Queued */
+            queued: number;
+        };
+        /** ShipmentDetail */
+        ShipmentDetail: {
+            /** Id */
+            id: number;
+            /** Tracking Number */
+            tracking_number: string;
+            /** Carrier */
+            carrier: string;
+            /** Carrier Confidence */
+            carrier_confidence: number;
+            /** Recipient Name */
+            recipient_name: string | null;
+            /** Company */
+            company: string | null;
+            /** Address1 */
+            address1: string | null;
+            /** Address2 */
+            address2: string | null;
+            /** City */
+            city: string | null;
+            /** State */
+            state: string | null;
+            /** Postal Code */
+            postal_code: string | null;
+            /** Country */
+            country: string;
+            /** Order Ref */
+            order_ref: string | null;
+            /** Ship Date */
+            ship_date: string | null;
+            /** Status */
+            status: string;
+            /** Status Raw */
+            status_raw: string | null;
+            /** Attention Flag */
+            attention_flag: string | null;
+            /** Expected Delivery */
+            expected_delivery: string | null;
+            /** Delivered At */
+            delivered_at: string | null;
+            /** Last Event At */
+            last_event_at: string | null;
+            /** Last Event Desc */
+            last_event_desc: string | null;
+            /** Last Event Place */
+            last_event_place: string | null;
+            /** Dest Lat */
+            dest_lat: number | null;
+            /** Dest Lng */
+            dest_lng: number | null;
+            /** Geocode Precision */
+            geocode_precision: string;
+            /** Last Polled At */
+            last_polled_at: string | null;
+            /** Poll Error Count */
+            poll_error_count: number;
+            /** Poll Last Error */
+            poll_last_error: string | null;
+            /** Days In Transit */
+            days_in_transit?: number | null;
+            /**
+             * Tags
+             * @default []
+             */
+            tags: components["schemas"]["TagOut"][];
+            /**
+             * Upload Ids
+             * @default []
+             */
+            upload_ids: number[];
+            /** Carrier Url */
+            carrier_url?: string | null;
+            /** Email */
+            email: string | null;
+            /** Phone */
+            phone: string | null;
+            /** Origin Postal Code */
+            origin_postal_code: string | null;
+            /** Status Code */
+            status_code: string | null;
+            /** First Event At */
+            first_event_at: string | null;
+            /** Carrier Locked */
+            carrier_locked: boolean;
+            /** Geocode Source */
+            geocode_source: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /**
+             * Events
+             * @default []
+             */
+            events: components["schemas"]["EventOut"][];
+            /**
+             * Notes
+             * @default []
+             */
+            notes: components["schemas"]["NoteOut"][];
+            /**
+             * Uploads
+             * @default []
+             */
+            uploads: components["schemas"]["UploadRef"][];
+        };
+        /** ShipmentPatch */
+        ShipmentPatch: {
+            /** Carrier */
+            carrier?: string | null;
+            /** Recipient Name */
+            recipient_name?: string | null;
+            /** Company */
+            company?: string | null;
+            /** Address1 */
+            address1?: string | null;
+            /** Address2 */
+            address2?: string | null;
+            /** City */
+            city?: string | null;
+            /** State */
+            state?: string | null;
+            /** Postal Code */
+            postal_code?: string | null;
+            /** Order Ref */
+            order_ref?: string | null;
+            /** Ship Date */
+            ship_date?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Phone */
+            phone?: string | null;
         };
         /** ShipmentRow */
         ShipmentRow: {
@@ -536,6 +916,15 @@ export interface components {
             carrier_detection: {
                 [key: string]: unknown;
             };
+        };
+        /** UploadRef */
+        UploadRef: {
+            /** Id */
+            id: number;
+            /** Filename */
+            filename: string;
+            /** Row Number */
+            row_number: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -1013,6 +1402,163 @@ export interface operations {
             };
         };
     };
+    get_shipment_api_shipments__shipment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_shipment_api_shipments__shipment_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_shipment_api_shipments__shipment_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShipmentPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shipment_path_api_shipments__shipment_id__path_geojson_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh_shipment_api_shipments__shipment_id__refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     points_api_map_points_geojson_get: {
         parameters: {
             query?: {
@@ -1092,6 +1638,141 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_refresh_api_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefreshStarted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_jobs_api_jobs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"][];
+                };
+            };
+        };
+    };
+    current_job_api_jobs_current_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"] | null;
+                };
+            };
+        };
+    };
+    get_job_api_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_job_api_jobs__job_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"];
                 };
             };
             /** @description Validation Error */

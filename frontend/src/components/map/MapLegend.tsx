@@ -42,7 +42,7 @@ export function MapLegend({ mode, counts }: { mode: MapMode; counts?: Record<str
           )
         })}
       </div>
-      <div className="mt-1 text-muted">Clusters take the color of their dominant status; red if any exception.</div>
+      <div className="mt-1 text-muted">Clusters take the color of their most common status. A red ring means at least one exception inside.</div>
     </div>
   )
 }

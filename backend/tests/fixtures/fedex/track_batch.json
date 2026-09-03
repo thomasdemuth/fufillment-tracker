@@ -1,0 +1,44 @@
+{
+  "transactionId": "abc",
+  "output": {
+    "completeTrackResults": [
+      {
+        "trackingNumber": "123456789012",
+        "trackResults": [
+          {
+            "trackingNumberInfo": {"trackingNumber": "123456789012", "carrierCode": "FDXE"},
+            "latestStatusDetail": {"code": "DL", "derivedCode": "DL", "statusByLocale": "Delivered", "description": "Delivered", "scanLocation": {"city": "MIAMI", "stateOrProvinceCode": "FL", "countryCode": "US"}},
+            "dateAndTimes": [{"type": "ACTUAL_DELIVERY", "dateTime": "2026-08-19T14:22:00-04:00"}, {"type": "SHIP", "dateTime": "2026-08-17T00:00:00-04:00"}],
+            "shipperInformation": {"address": {"city": "MEMPHIS", "stateOrProvinceCode": "TN", "postalCode": "38118", "countryCode": "US"}},
+            "recipientInformation": {"address": {"city": "MIAMI", "stateOrProvinceCode": "FL", "postalCode": "33152", "countryCode": "US"}},
+            "scanEvents": [
+              {"date": "2026-08-19T14:22:00-04:00", "eventType": "DL", "eventDescription": "Delivered", "derivedStatusCode": "DL", "derivedStatus": "Delivered", "scanLocation": {"city": "MIAMI", "stateOrProvinceCode": "FL", "postalCode": "33152", "countryCode": "US"}},
+              {"date": "2026-08-19T08:05:00-04:00", "eventType": "OD", "eventDescription": "On FedEx vehicle for delivery", "derivedStatusCode": "OD", "scanLocation": {"city": "MIAMI", "stateOrProvinceCode": "FL", "postalCode": "33152", "countryCode": "US"}},
+              {"date": "2026-08-18T03:30:00-05:00", "eventType": "DP", "eventDescription": "Departed FedEx hub", "derivedStatusCode": "IT", "scanLocation": {"city": "MEMPHIS", "stateOrProvinceCode": "TN", "postalCode": "38118", "countryCode": "US"}},
+              {"date": "2026-08-17T18:12:00-05:00", "eventType": "PU", "eventDescription": "Picked up", "derivedStatusCode": "PU", "scanLocation": {"city": "MEMPHIS", "stateOrProvinceCode": "TN", "postalCode": "38118", "countryCode": "US"}}
+            ]
+          }
+        ]
+      },
+      {
+        "trackingNumber": "123456789013",
+        "trackResults": [
+          {
+            "trackingNumberInfo": {"trackingNumber": "123456789013"},
+            "latestStatusDetail": {"code": "DE", "derivedCode": "DE", "statusByLocale": "Delivery exception", "description": "Delivery exception"},
+            "estimatedDeliveryTimeWindow": {"window": {"begins": "2026-08-22T08:00:00-04:00", "ends": "2026-08-22T20:00:00-04:00"}},
+            "scanEvents": [
+              {"date": "2026-08-21T11:00:00-04:00", "eventType": "DE", "eventDescription": "Delivery exception", "exceptionCode": "08", "exceptionDescription": "Customer not available or business closed", "derivedStatusCode": "DE", "scanLocation": {"city": "TAMPA", "stateOrProvinceCode": "FL", "postalCode": "33602", "countryCode": "US"}}
+            ]
+          }
+        ]
+      },
+      {
+        "trackingNumber": "123456789014",
+        "trackResults": [
+          {"trackingNumberInfo": {"trackingNumber": "123456789014"}, "error": {"code": "TRACKING.TRACKINGNUMBER.NOTFOUND", "message": "Tracking number cannot be found. Please correct the tracking number and try again."}}
+        ]
+      }
+    ]
+  }
+}

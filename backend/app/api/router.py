@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api import config, health, map, presets, shipments, uploads
+from app.api import config, health, map, presets, refresh, shipments, uploads
 
 api_router = APIRouter()
 api_router.include_router(health.router, tags=["health"])
@@ -9,3 +9,4 @@ api_router.include_router(uploads.router, tags=["uploads"])
 api_router.include_router(presets.router, tags=["presets"])
 api_router.include_router(shipments.router, tags=["shipments"])
 api_router.include_router(map.router, tags=["map"])
+api_router.include_router(refresh.router, tags=["refresh"])

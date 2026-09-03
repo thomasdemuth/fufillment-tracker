@@ -148,3 +148,85 @@ export function useMapStates(f: Partial<Filters>) {
     placeholderData: keepPreviousData,
   })
 }
+
+// ---------------------------------------------------------------- shipment detail / refresh / jobs
+export type ShipmentDetail = components['schemas']['ShipmentDetail']
+export type JobOut = components['schemas']['JobOut']
+export type ShipmentPatch = components['schemas']['ShipmentPatch']
+export type PathCollection = import('geojson').FeatureCollection<import('geojson').Point | import('geojson').LineString, Record<string, unknown>>
+
+export function useShipment(id: number | null) {
+  return useQuery({
+    queryKey: ['shipment', id],
+    queryFn: async () => unwrap(await api.GET('/api/shipments/{shipment_id}', { params: { path: { shipment_id: id! } } })),
+    enabled: id != null,
+  })
+}
+
+export function useShipmentPath(id: number | null) {
+  return useQuery({
+    queryKey: ['shipment', id, 'path'],
+    queryFn: async () => unwrap(await api.GET('/api/shipments/{shipment_id}/path.geojson', { params: { path: { shipment_id: id! } } })) as PathCollection,
+    enabled: id != null,
+  })
+}
+
+export function useRefreshShipment() {
+  const qc = useQueryClient()
+  const invalidate = useInvalidateAll()
+  return useMutation({
+    mutationFn: async (id: number) => unwrap(await api.POST('/api/shipments/{shipment_id}/refresh', { params: { path: { shipment_id: id } } })),
+    onSuccess: (data, id) => {
+      qc.setQueryData(['shipment', id], data)
+      qc.invalidateQueries({ queryKey: ['shipment', id, 'path'] })
+      invalidate()
+    },
+  })
+}
+
+export function usePatchShipment() {
+  const qc = useQueryClient()
+  const invalidate = useInvalidateAll()
+  return useMutation({
+    mutationFn: async (args: { id: number; body: ShipmentPatch }) =>
+      unwrap(await api.PATCH('/api/shipments/{shipment_id}', { params: { path: { shipment_id: args.id } }, body: args.body })),
+    onSuccess: (data, args) => {
+      qc.setQueryData(['shipment', args.id], data)
+      invalidate()
+    },
+  })
+}
+
+export function useDeleteShipment() {
+  const invalidate = useInvalidateAll()
+  return useMutation({
+    mutationFn: async (id: number) => unwrap(await api.DELETE('/api/shipments/{shipment_id}', { params: { path: { shipment_id: id } } })),
+    onSuccess: invalidate,
+  })
+}
+
+export function useStartRefresh() {
+  return useMutation({
+    mutationFn: async (body: components['schemas']['RefreshRequest']) => unwrap(await api.POST('/api/refresh', { body })),
+  })
+}
+
+export function useJob(id: number | null) {
+  return useQuery({
+    queryKey: ['job', id],
+    queryFn: async () => unwrap(await api.GET('/api/jobs/{job_id}', { params: { path: { job_id: id! } } })),
+    enabled: id != null,
+    refetchInterval: (q) => {
+      const s = q.state.data?.status
+      return s === 'queued' || s === 'running' ? 700 : false
+    },
+  })
+}
+
+export function useCurrentJob() {
+  return useQuery({
+    queryKey: ['job', 'current'],
+    queryFn: async () => unwrap(await api.GET('/api/jobs/current')),
+    refetchInterval: (q) => (q.state.data ? 1000 : 10_000),
+  })
+}

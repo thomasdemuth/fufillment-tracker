@@ -1,0 +1,17 @@
+{
+  "trackingNumber": "9400111899223197428490",
+  "status": "Delivered, In/At Mailbox",
+  "statusCategory": "Delivered",
+  "statusSummary": "Your item was delivered in or at the mailbox at 1:02 pm on August 20, 2026 in AUSTIN, TX 78701.",
+  "expectedDeliveryTimeStamp": "2026-08-20T20:00:00Z",
+  "originZIP": "90052",
+  "destinationZIP": "78701",
+  "trackingEvents": [
+    {"eventType": "Delivered, In/At Mailbox", "eventCode": "01", "eventTimestamp": "2026-08-20T13:02:00", "eventCity": "AUSTIN", "eventState": "TX", "eventZIP": "78701", "eventCountry": "US"},
+    {"eventType": "Out for Delivery", "eventCode": "OF", "eventTimestamp": "2026-08-20T06:10:00", "eventCity": "AUSTIN", "eventState": "TX", "eventZIP": "78701"},
+    {"eventType": "Arrived at Post Office", "eventCode": "07", "eventTimestamp": "2026-08-20T04:41:00", "eventCity": "AUSTIN", "eventState": "TX", "eventZIP": "78701"},
+    {"eventType": "Departed USPS Regional Facility", "eventCode": "TM", "eventTimestamp": "2026-08-18T22:13:00", "eventCity": "LOS ANGELES", "eventState": "CA", "eventZIP": "90052"},
+    {"eventType": "Accepted at USPS Origin Facility", "eventCode": "03", "eventTimestamp": "2026-08-17T15:30:00", "eventCity": "LOS ANGELES", "eventState": "CA", "eventZIP": "90052"},
+    {"eventType": "Shipping Label Created, USPS Awaiting Item", "eventCode": "GX", "eventTimestamp": "2026-08-16T10:00:00", "eventCity": "LOS ANGELES", "eventState": "CA", "eventZIP": "90052"}
+  ]
+}

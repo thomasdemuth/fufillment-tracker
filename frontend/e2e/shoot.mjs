@@ -17,6 +17,10 @@ for (const spec of specs) {
       await page.getByText(o.slice(6), { exact: true }).first().click()
       await page.waitForTimeout(300)
     }
+    if (o.startsWith('sel=')) {
+      await page.locator(o.slice(4)).first().click()
+      await page.waitForTimeout(300)
+    }
     if (o.startsWith('wait=')) await page.waitForTimeout(Number(o.slice(5)))
   }
   await page.waitForTimeout(1200)

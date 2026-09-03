@@ -13,10 +13,10 @@ describe('map layer builders', () => {
     expect(e[1]).toEqual(['get', 's'])
     expect(e.length).toBe(2 + STATUS_ORDER.length * 2 + 1)
   })
-  it('cluster color prefers exceptions', () => {
+  it('cluster color is an argmax over statuses starting with exception', () => {
     const e = clusterColorExpression() as unknown[]
     expect(e[0]).toBe('case')
-    expect(e[1]).toEqual(['>', ['get', 'hot'], 0])
+    expect(JSON.stringify(e[1])).toContain('"exception"')
   })
   it('point layer excludes clusters', () => {
     expect(pointLayer().filter).toEqual(['!', ['has', 'point_count']])
