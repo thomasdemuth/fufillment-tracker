@@ -13,6 +13,7 @@ from app.api import (
     refresh,
     settings,
     shipments,
+    snapshot,
     uploads,
 )
 
@@ -28,5 +29,6 @@ api_router.include_router(map.router, tags=["map"])
 api_router.include_router(refresh.router, tags=["refresh"])
 api_router.include_router(attention.router, tags=["attention"])
 api_router.include_router(export.router, tags=["export"])
+api_router.include_router(snapshot.router, tags=["snapshot"])
 api_router.include_router(settings.router, tags=["settings"])
 api_router.include_router(privacy.router, tags=["privacy"])
