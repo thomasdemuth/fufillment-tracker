@@ -41,3 +41,6 @@ docker-build:
 
 docker-up:
 	docker compose up
+
+e2e: ## Playwright smoke test against a running server on :8000 (mock mode, fresh data dir recommended)
+	cd frontend && pnpm exec playwright test

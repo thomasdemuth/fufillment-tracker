@@ -21,6 +21,11 @@ for (const spec of specs) {
       await page.locator(o.slice(4)).first().click()
       await page.waitForTimeout(300)
     }
+    if (o.startsWith('key=')) {
+      await page.keyboard.press(o.slice(4))
+      await page.waitForTimeout(300)
+    }
+    if (o.startsWith('type=')) await page.keyboard.type(o.slice(5))
     if (o.startsWith('wait=')) await page.waitForTimeout(Number(o.slice(5)))
   }
   await page.waitForTimeout(1200)

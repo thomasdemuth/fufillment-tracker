@@ -161,6 +161,7 @@ def load_shipment(db: Session, shipment_id: int) -> Shipment:
         select(Shipment)
         .where(Shipment.id == shipment_id)
         .options(selectinload(Shipment.events), selectinload(Shipment.notes))
+        .execution_options(populate_existing=True)
     ).scalar_one_or_none()
     if not s:
         raise HTTPException(404, "Shipment not found")

@@ -1,28 +1,195 @@
 # Fulfillment Tracker
 
-Self-hosted dashboard for shipment tracking. Upload spreadsheets of recipients (name, address, tracking number),
-then see everyone on a map, a status board you can filter and sort, and a per-shipment view with the transit path
-and a link to the carrier's tracking page.
+A self-hosted dashboard for keeping an eye on shipments. Upload spreadsheets of recipients (name, address, tracking
+number), then see everyone on a map, work a status board you can filter and sort any way you like, and open any
+shipment to see its transit path, event history and a link to the carrier's tracking page.
 
-**Privacy first:** everything runs on your machine. Names and addresses never leave it. Only tracking numbers are
-sent, straight to USPS/FedEx, and only when you click Refresh.
+**Private by design.** Everything runs on your machine. Names and addresses never leave it. Only tracking numbers are
+sent, straight to USPS or FedEx, and only when you click Refresh.
 
-## Quick start
+![Board](docs/board.png)
+
+| Map | Shipment | Attention |
+|---|---|---|
+| ![Map](docs/map.png) | ![Shipment](docs/shipment.png) | ![Attention](docs/attention.png) |
+
+## Quick start (Docker)
 
 ```bash
+git clone <this repo> fulfillment-tracker && cd fulfillment-tracker
 cp .env.example .env
 docker compose up
 ```
 
-Open http://localhost:8000. The app starts in **mock mode** with no credentials needed.
+Open **http://localhost:8000**. The app starts in **mock mode**: tracking data is generated locally so you can try
+every screen without any carrier account. Data is stored in `./data` (SQLite + your uploaded files).
 
-Developer setup (Python 3.11 + uv, Node 22 + pnpm):
+To see it with sample data, run in another terminal:
 
 ```bash
-make dev        # backend on :8000, frontend dev server on :5173
-make seed       # generate demo spreadsheets in ./demo
-make demo       # upload them to the running server and refresh with mock carriers
-make test       # backend + frontend tests
+make seed demo      # needs Python 3.11 + uv; or upload the files in ./demo through the UI
 ```
 
-(Full documentation is written in the final phase.)
+## Quick start (without Docker)
+
+Requires Python 3.11+ with [uv](https://docs.astral.sh/uv/) and Node 22 with pnpm.
+
+```bash
+cd backend && uv sync && cd ..
+cd frontend && pnpm install && cd ..
+make dev            # backend on http://localhost:8000, Vite dev server on http://localhost:5173
+```
+
+Open http://localhost:5173 during development (it proxies `/api` to the backend). For a production-style run, build
+the frontend once (`make build`) and use http://localhost:8000 directly.
+
+## What you get
+
+| Screen | What it does |
+|---|---|
+| **Map** | Every recipient on a zoomable map. Three views: status-colored **clusters/points**, a **heatmap** (exceptions weigh double), and a **by-state** choropleth. Hover for details, click a point to open the shipment, click a state to filter. |
+| **Board** | Sortable, filterable table with stat tiles by status. Filter by status, carrier, state, upload, tag, city, ship date, last-event date, days in transit, or free-text search. Choose columns, paginate, export the current view to CSV/XLSX. |
+| **Attention** | Exceptions, returns, packages waiting for pickup, tracking errors, shipments with no scans for N days, and addresses that could not be placed on the map, grouped by reason. |
+| **Shipment detail** | Status, key facts, editable recipient, transit-path map (origin → scans → destination), full event timeline, notes, tags, one-click refresh, and "Open on USPS/FedEx". |
+| **Uploads** | Every spreadsheet you imported with new / merged / skipped counts. Delete an upload to remove shipments that came only from it. |
+| **Settings** | Carrier credentials (mock or live, sandbox toggle, test button), geocoder choice, stuck-days rule, basemap URL, theme. |
+| **Privacy** | Exactly what leaves the machine, where data lives, where secrets are stored, an outbound-request log, and a wipe-everything button. |
+
+Keyboard: `⌘/Ctrl+K` opens the command palette (search shipments, jump to pages), `/` focuses search, `Esc` closes
+the drawer.
+
+## Uploading spreadsheets
+
+Drop an `.xlsx`, `.xls`, `.ods`, `.csv` or `.tsv`. The importer:
+
+- finds the header row even when there is a title row above it;
+- auto-detects columns (name, address, city, state, ZIP, tracking number, carrier, order, ship date, email, phone, and
+  combined "City, ST ZIP" columns) and lets you confirm or fix the mapping before anything is saved;
+- remembers mappings as presets and applies them automatically to files with the same headers;
+- detects the carrier from the tracking-number format (USPS 22-digit IMpb with check digit, 13-character international,
+  FedEx 12/15/20/22-digit) and asks for a default when a number is ambiguous. A **Carrier** column in your sheet always
+  wins, so include one if you can;
+- merges duplicate tracking numbers across uploads instead of creating duplicates, filling in blanks from the new file;
+- places every shipment on the map by ZIP code, offline.
+
+Only a tracking-number column is required. Without a ZIP or city/state, shipments import but do not appear on the map.
+
+## Tracking status
+
+Nothing is polled automatically. Click **Refresh** on the Map, Board or Attention page to fetch the latest status for
+active shipments (delivered and returned ones are skipped unless you tick "include delivered"). Progress shows in the
+button; the page updates when the job finishes. Each shipment also has its own Refresh button.
+
+Statuses are normalized to: label created, in transit, out for delivery, delivered, exception, returned, unknown.
+Carrier-specific wording (e.g. USPS "Available for Pickup") is kept as the raw status and surfaced on the Attention page.
+
+### Connecting USPS
+
+1. Create a free account at https://developers.usps.com and add an app. In the app, add the **Tracking** API product.
+2. Copy the app's **Consumer Key** and **Consumer Secret**.
+3. In the app: **Settings → Carriers → USPS**, switch to **Live**, paste the key and secret, tick **test environment**
+   if your app is not yet approved for production, **Save**, then **Test credentials**.
+
+The USPS test environment (`apis-tem.usps.com`) returns canned data. Production access to the Tracking product can take
+a few business days to be approved.
+
+### Connecting FedEx
+
+1. Create a free account at https://developer.fedex.com and create a project that includes the **Track API**.
+2. Copy the **API Key** and **Secret Key** (test or production).
+3. In the app: **Settings → Carriers → FedEx**, switch to **Live**, paste the keys, tick **sandbox** for test keys,
+   **Save**, then **Test credentials**.
+
+The FedEx sandbox only returns results for FedEx's published test tracking numbers.
+
+Credentials can also be supplied through environment variables (`USPS_CLIENT_ID`, `USPS_CLIENT_SECRET`,
+`FEDEX_API_KEY`, `FEDEX_SECRET_KEY`); they then override the Settings page and show as read-only.
+
+## Geocoding
+
+- **Offline (default, always on):** each shipment is placed at the center of its ZIP code using a bundled US ZIP
+  database. Nothing leaves the machine. Missing ZIPs fall back to the city or state center. Scan locations in transit
+  paths are placed the same way.
+- **Street-level (opt-in per upload):** choose it in the upload wizard to send street addresses to a geocoder you
+  configure in **Settings → Geocoding**: OpenStreetMap Nominatim (free, needs a contact email), Geocodio (API key) or
+  Mapbox (token). Results are cached so each address is sent once. Runs as a background job after the import.
+
+## Privacy and security
+
+- The only outbound requests the server makes are to the carrier APIs (tracking numbers only), the optional geocoder
+  (addresses, only when you opt in), and nothing else. The browser additionally fetches map tiles from the basemap host,
+  which reveals only the area you are viewing. The **Privacy** page lists every host contacted and how often.
+- No analytics, telemetry, update checks, CDN scripts or web fonts. A Content-Security-Policy header enforces the
+  allowed hosts.
+- Carrier secrets and geocoder keys are encrypted at rest with a key from `APP_SECRET_KEY` or an auto-generated
+  `data/.secret_key` (mode 600). Back up that file with the database if you want to keep saved credentials.
+- Set `APP_PASSWORD` in `.env` to require a password (HTTP Basic, any username) when you expose the app on your LAN.
+  Put it behind HTTPS (Caddy, Tailscale, etc.) if it leaves your machine.
+- Uploaded spreadsheets are kept in `data/uploads/` so an upload can be inspected or re-parsed; they are deleted with the
+  upload or with **Wipe all data**.
+
+## Fully offline maps (optional)
+
+The default basemap is OpenFreeMap's public vector tiles. To run with no internet at all:
+
+1. Download a PMTiles basemap for your region (for example from [Protomaps builds](https://maps.protomaps.com/builds/),
+   a US extract is roughly 1–2 GB) into `data/tiles/basemap.pmtiles`.
+2. Serve it locally with any static server that supports HTTP range requests (or `pmtiles serve`), and create a style
+   JSON that points at it (Protomaps publishes ready-made styles).
+3. Set `MAP_STYLE_URL` in `.env` (or **Settings → General → Basemap style URL**) to your style's URL.
+
+If the tile host is unreachable, the map falls back to a blank background so your data still renders.
+
+## Configuration
+
+All options live in `.env` (see `.env.example`):
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `DATA_DIR` | `./data` | Where the SQLite database, uploads and secret key live |
+| `CARRIER_MODE` | `mock` | `mock` generates fake tracking data; `live` uses real carrier APIs |
+| `APP_PASSWORD` | unset | Require a password for the whole app |
+| `APP_SECRET_KEY` | auto | Key used to encrypt stored secrets |
+| `USPS_CLIENT_ID` / `USPS_CLIENT_SECRET` | unset | USPS credentials via env (override Settings) |
+| `FEDEX_API_KEY` / `FEDEX_SECRET_KEY` | unset | FedEx credentials via env (override Settings) |
+| `MAP_STYLE_URL` | OpenFreeMap liberty | MapLibre style URL for the basemap |
+
+## Development
+
+```
+backend/    FastAPI + SQLAlchemy + SQLite (uv, ruff, pytest)
+frontend/   React 19 + TypeScript + Vite + Tailwind 4 + MapLibre GL (pnpm, vitest, playwright)
+demo/       generated sample spreadsheets (fake data)
+```
+
+```bash
+make dev             # run both with hot reload
+make test            # pytest + vitest
+make lint            # ruff + oxlint + tsc
+make seed            # regenerate ./demo spreadsheets
+make demo            # upload ./demo files to a running server and refresh with mock carriers
+make gen-api         # regenerate frontend/src/api/schema.d.ts from the running backend's OpenAPI
+make e2e             # Playwright smoke test against a running server on :8000
+make docker-build    # build the production image
+```
+
+API docs are served at http://localhost:8000/api/docs.
+
+### Design notes
+
+- **Status mapping** lives in `backend/app/services/status_map.py` as plain tables, so adjusting how a carrier code maps
+  to a normalized status is a one-line change with a parametrized test.
+- **Carriers** implement a small protocol (`backend/app/carriers/base.py`): `fetch(numbers) -> {number: TrackResult |
+  TrackError}`. The mock carrier is deterministic (hash of the tracking number) and advances with time, so demos and
+  tests are stable.
+- **Filters** are one shared SQLAlchemy builder (`backend/app/services/query.py`) used by the board, map, stats, export
+  and attention endpoints, and they live in the URL on the frontend so views stay in sync and links are shareable.
+- **Every outbound HTTP request** goes through `backend/app/http.py`, which records host + purpose + data class (never
+  payloads) for the Privacy page.
+
+## Assumptions
+
+- US addresses (state and ZIP normalization assume US; other rows import without a map position).
+- One sheet per upload (choose the sheet in the wizard).
+- "Delivered to agent" counts as delivered; "available for pickup" counts as in transit and is flagged for attention.
+- Notes are plain text.

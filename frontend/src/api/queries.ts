@@ -230,3 +230,135 @@ export function useCurrentJob() {
     refetchInterval: (q) => (q.state.data ? 1000 : 10_000),
   })
 }
+
+// ---------------------------------------------------------------- settings / privacy
+export type CarrierSettings = components['schemas']['CarrierSettingsOut']
+export type GeocoderSettings = components['schemas']['GeocoderSettingsOut']
+export type GeneralSettings = components['schemas']['GeneralSettings']
+export type PrivacySummary = components['schemas']['PrivacySummary']
+
+export function useCarrierSettings() {
+  return useQuery({ queryKey: ['settings', 'carriers'], queryFn: async () => unwrap(await api.GET('/api/settings/carriers')) })
+}
+
+export function useSaveCarrier() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: { carrier: 'usps' | 'fedex'; body: components['schemas']['CarrierSettingsIn'] }) =>
+      unwrap(await api.PUT('/api/settings/carriers/{carrier}', { params: { path: { carrier: args.carrier } }, body: args.body })),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['settings'] })
+      qc.invalidateQueries({ queryKey: ['config'] })
+      qc.invalidateQueries({ queryKey: ['health'] })
+    },
+  })
+}
+
+export function useTestCarrier() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (carrier: 'usps' | 'fedex') => unwrap(await api.POST('/api/settings/carriers/{carrier}/test', { params: { path: { carrier } } })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
+  })
+}
+
+export function useGeocoderSettings() {
+  return useQuery({ queryKey: ['settings', 'geocoder'], queryFn: async () => unwrap(await api.GET('/api/settings/geocoder')) })
+}
+
+export function useSaveGeocoder() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (body: components['schemas']['GeocoderSettingsIn']) => unwrap(await api.PUT('/api/settings/geocoder', { body })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
+  })
+}
+
+export function useTestGeocoder() {
+  return useMutation({ mutationFn: async () => unwrap(await api.POST('/api/settings/geocoder/test')) })
+}
+
+export function useGeneralSettings() {
+  return useQuery({ queryKey: ['settings', 'general'], queryFn: async () => unwrap(await api.GET('/api/settings')) })
+}
+
+export function useSaveGeneral() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (body: GeneralSettings) => unwrap(await api.PUT('/api/settings', { body })),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['settings'] })
+      qc.invalidateQueries({ queryKey: ['config'] })
+    },
+  })
+}
+
+export function usePrivacySummary() {
+  return useQuery({ queryKey: ['privacy'], queryFn: async () => unwrap(await api.GET('/api/privacy/summary')) })
+}
+
+export function useWipe() {
+  const invalidate = useInvalidateAll()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: { token: string; keep_settings: boolean }) => unwrap(await api.POST('/api/privacy/wipe', { body: args })),
+    onSuccess: () => {
+      invalidate()
+      qc.invalidateQueries({ queryKey: ['privacy'] })
+    },
+  })
+}
+
+export function useHealth() {
+  return useQuery({
+    queryKey: ['health'],
+    queryFn: async () => unwrap(await api.GET('/api/health')) as { ok: boolean; carriers: Record<string, string>; refresh_running: boolean; carrier_mode: string; auth: boolean },
+    staleTime: 30_000,
+  })
+}
+
+// ---------------------------------------------------------------- attention / notes / tags
+export type AttentionRow = components['schemas']['AttentionRow']
+
+export function useAttention(f: Partial<Filters>) {
+  const query = filtersToQuery(f) as Query
+  return useQuery({
+    queryKey: ['attention', query],
+    queryFn: async () => unwrap(await api.GET('/api/attention', { params: { query } })),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useAddNote() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: { id: number; body: string }) =>
+      unwrap(await api.POST('/api/shipments/{shipment_id}/notes', { params: { path: { shipment_id: args.id } }, body: { body: args.body } })),
+    onSuccess: (data, args) => qc.setQueryData(['shipment', args.id], data),
+  })
+}
+
+export function useDeleteNote() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: { id: number; noteId: number }) => unwrap(await api.DELETE('/api/notes/{note_id}', { params: { path: { note_id: args.noteId } } })),
+    onSuccess: (_d, args) => qc.invalidateQueries({ queryKey: ['shipment', args.id] }),
+  })
+}
+
+export function useSetTags() {
+  const qc = useQueryClient()
+  const invalidate = useInvalidateAll()
+  return useMutation({
+    mutationFn: async (args: { id: number; tags: string[] }) =>
+      unwrap(await api.PUT('/api/shipments/{shipment_id}/tags', { params: { path: { shipment_id: args.id } }, body: { tags: args.tags } })),
+    onSuccess: (data, args) => {
+      qc.setQueryData(['shipment', args.id], data)
+      invalidate()
+    },
+  })
+}
+
+export function useTags() {
+  return useQuery({ queryKey: ['tags'], queryFn: async () => unwrap(await api.GET('/api/tags')) })
+}

@@ -255,6 +255,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shipments/{shipment_id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Note */
+        post: operations["add_note_api_shipments__shipment_id__notes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notes/{note_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edit Note */
+        put: operations["edit_note_api_notes__note_id__put"];
+        post?: never;
+        /** Delete Note */
+        delete: operations["delete_note_api_notes__note_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Tags */
+        get: operations["list_tags_api_tags_get"];
+        put?: never;
+        /** Create Tag */
+        post: operations["create_tag_api_tags_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tags/{tag_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Tag */
+        put: operations["update_tag_api_tags__tag_id__put"];
+        post?: never;
+        /** Delete Tag */
+        delete: operations["delete_tag_api_tags__tag_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shipments/{shipment_id}/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Tags */
+        put: operations["set_tags_api_shipments__shipment_id__tags_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/map/points.geojson": {
         parameters: {
             query?: never;
@@ -374,10 +462,280 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/attention": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Attention */
+        get: operations["attention_api_attention_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export */
+        get: operations["export_api_export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get General */
+        get: operations["get_general_api_settings_get"];
+        /** Put General */
+        put: operations["put_general_api_settings_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/carriers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Carriers */
+        get: operations["get_carriers_api_settings_carriers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/carriers/{carrier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Carrier */
+        put: operations["put_carrier_api_settings_carriers__carrier__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/carriers/{carrier}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test Carrier */
+        post: operations["test_carrier_api_settings_carriers__carrier__test_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/geocoder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Geocoder */
+        get: operations["get_geocoder_api_settings_geocoder_get"];
+        /** Put Geocoder */
+        put: operations["put_geocoder_api_settings_geocoder_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/geocoder/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test Geocoder */
+        post: operations["test_geocoder_api_settings_geocoder_test_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/privacy/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Summary */
+        get: operations["summary_api_privacy_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/privacy/egress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Egress */
+        get: operations["egress_api_privacy_egress_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/privacy/wipe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Wipe
+         * @description Delete every shipment, upload, event, note, tag, job and cached geocode. Optionally keep settings.
+         */
+        post: operations["wipe_api_privacy_wipe_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AttentionRow */
+        AttentionRow: {
+            /** Id */
+            id: number;
+            /** Tracking Number */
+            tracking_number: string;
+            /** Carrier */
+            carrier: string;
+            /** Carrier Confidence */
+            carrier_confidence: number;
+            /** Recipient Name */
+            recipient_name: string | null;
+            /** Company */
+            company: string | null;
+            /** Address1 */
+            address1: string | null;
+            /** Address2 */
+            address2: string | null;
+            /** City */
+            city: string | null;
+            /** State */
+            state: string | null;
+            /** Postal Code */
+            postal_code: string | null;
+            /** Country */
+            country: string;
+            /** Order Ref */
+            order_ref: string | null;
+            /** Ship Date */
+            ship_date: string | null;
+            /** Status */
+            status: string;
+            /** Status Raw */
+            status_raw: string | null;
+            /** Attention Flag */
+            attention_flag: string | null;
+            /** Expected Delivery */
+            expected_delivery: string | null;
+            /** Delivered At */
+            delivered_at: string | null;
+            /** Last Event At */
+            last_event_at: string | null;
+            /** Last Event Desc */
+            last_event_desc: string | null;
+            /** Last Event Place */
+            last_event_place: string | null;
+            /** Dest Lat */
+            dest_lat: number | null;
+            /** Dest Lng */
+            dest_lng: number | null;
+            /** Geocode Precision */
+            geocode_precision: string;
+            /** Last Polled At */
+            last_polled_at: string | null;
+            /** Poll Error Count */
+            poll_error_count: number;
+            /** Poll Last Error */
+            poll_last_error: string | null;
+            /** Days In Transit */
+            days_in_transit?: number | null;
+            /**
+             * Tags
+             * @default []
+             */
+            tags: components["schemas"]["TagOut"][];
+            /**
+             * Upload Ids
+             * @default []
+             */
+            upload_ids: number[];
+            /** Carrier Url */
+            carrier_url?: string | null;
+            /**
+             * Reasons
+             * @default []
+             */
+            reasons: string[];
+        };
         /** Body_create_upload_api_uploads_post */
         Body_create_upload_api_uploads_post: {
             /**
@@ -385,6 +743,51 @@ export interface components {
              * Format: binary
              */
             file: string;
+        };
+        /**
+         * Carrier
+         * @enum {string}
+         */
+        Carrier: "usps" | "fedex" | "unknown";
+        /** CarrierSettingsIn */
+        CarrierSettingsIn: {
+            /** Enabled */
+            enabled?: boolean | null;
+            /** Mode */
+            mode?: string | null;
+            /** Sandbox */
+            sandbox?: boolean | null;
+            /** Client Id */
+            client_id?: string | null;
+            /** Client Secret */
+            client_secret?: string | null;
+        };
+        /** CarrierSettingsOut */
+        CarrierSettingsOut: {
+            /** Carrier */
+            carrier: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Mode */
+            mode: string;
+            /** Sandbox */
+            sandbox: boolean;
+            /** Client Id */
+            client_id: string | null;
+            /** Client Secret Masked */
+            client_secret_masked: string | null;
+            /** Has Secret */
+            has_secret: boolean;
+            /** From Env */
+            from_env: boolean;
+            /** Status */
+            status: string;
+            /** Last Check At */
+            last_check_at: string | null;
+            /** Last Check Ok */
+            last_check_ok: boolean | null;
+            /** Last Check Message */
+            last_check_message: string | null;
         };
         /** CommitRequest */
         CommitRequest: {
@@ -426,6 +829,36 @@ export interface components {
             }[];
             /** Geocode Job Id */
             geocode_job_id?: number | null;
+        };
+        /** CredentialCheck */
+        CredentialCheck: {
+            /** Ok */
+            ok: boolean;
+            /** Message */
+            message: string;
+        };
+        /** EgressOut */
+        EgressOut: {
+            /** Host */
+            host: string;
+            /** Purpose */
+            purpose: string;
+            /** Data Classes */
+            data_classes: string;
+            /** Count */
+            count: number;
+            /**
+             * First At
+             * Format: date-time
+             */
+            first_at: string;
+            /**
+             * Last At
+             * Format: date-time
+             */
+            last_at: string;
+            /** Last Status */
+            last_status: string | null;
         };
         /** EventOut */
         EventOut: {
@@ -471,6 +904,35 @@ export interface components {
             /** Statuses */
             statuses: string[];
         };
+        /** GeneralSettings */
+        GeneralSettings: {
+            /** Stuck Days */
+            stuck_days?: number | null;
+            /** Origin Postal Code */
+            origin_postal_code?: string | null;
+            /** Map Style Url */
+            map_style_url?: string | null;
+        };
+        /** GeocoderSettingsIn */
+        GeocoderSettingsIn: {
+            /** Provider */
+            provider?: string | null;
+            /** Api Key */
+            api_key?: string | null;
+            /** Nominatim Email */
+            nominatim_email?: string | null;
+        };
+        /** GeocoderSettingsOut */
+        GeocoderSettingsOut: {
+            /** Provider */
+            provider: string;
+            /** Api Key Masked */
+            api_key_masked: string | null;
+            /** Has Key */
+            has_key: boolean;
+            /** Nominatim Email */
+            nominatim_email: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -505,6 +967,11 @@ export interface components {
             started_at: string | null;
             /** Finished At */
             finished_at: string | null;
+        };
+        /** NoteIn */
+        NoteIn: {
+            /** Body */
+            body: string;
         };
         /** NoteOut */
         NoteOut: {
@@ -564,6 +1031,37 @@ export interface components {
             created_at: string;
             /** Last Used At */
             last_used_at: string | null;
+        };
+        /** PrivacySummary */
+        PrivacySummary: {
+            /** Data Dir */
+            data_dir: string;
+            /** Db Size Bytes */
+            db_size_bytes: number;
+            /** Uploads Size Bytes */
+            uploads_size_bytes: number;
+            /** Shipments */
+            shipments: number;
+            /** Uploads */
+            uploads: number;
+            /** Events */
+            events: number;
+            /** Secrets */
+            secrets: {
+                [key: string]: unknown;
+            }[];
+            /** Tile Host */
+            tile_host: string;
+            /** Geocoder */
+            geocoder: string;
+            /** Auth Enabled */
+            auth_enabled: boolean;
+            /** Egress */
+            egress: {
+                [key: string]: unknown;
+            }[];
+            /** Wipe Token */
+            wipe_token: string;
         };
         /** RefreshRequest */
         RefreshRequest: {
@@ -828,6 +1326,13 @@ export interface components {
             /** Last Polled At */
             last_polled_at: string | null;
         };
+        /** TagIn */
+        TagIn: {
+            /** Name */
+            name: string;
+            /** Color */
+            color?: string | null;
+        };
         /** TagOut */
         TagOut: {
             /** Id */
@@ -836,6 +1341,11 @@ export interface components {
             name: string;
             /** Color */
             color: string;
+        };
+        /** TagsSet */
+        TagsSet: {
+            /** Tags */
+            tags: string[];
         };
         /** UploadOut */
         UploadOut: {
@@ -934,6 +1444,16 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** WipeRequest */
+        WipeRequest: {
+            /** Token */
+            token: string;
+            /**
+             * Keep Settings
+             * @default true
+             */
+            keep_settings: boolean;
         };
     };
     responses: never;
@@ -1559,6 +2079,257 @@ export interface operations {
             };
         };
     };
+    add_note_api_shipments__shipment_id__notes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_note_api_notes__note_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_note_api_notes__note_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_tags_api_tags_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagOut"][];
+                };
+            };
+        };
+    };
+    create_tag_api_tags_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_tag_api_tags__tag_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tag_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_tag_api_tags__tag_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tag_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_tags_api_shipments__shipment_id__tags_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagsSet"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     points_api_map_points_geojson_get: {
         parameters: {
             query?: {
@@ -1773,6 +2544,388 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    attention_api_attention_get: {
+        parameters: {
+            query?: {
+                sort?: string | null;
+                limit?: number;
+                status?: string[] | null;
+                carrier?: string[] | null;
+                upload_id?: string[] | null;
+                state?: string[] | null;
+                tag?: string[] | null;
+                city?: string | null;
+                q?: string | null;
+                ship_date_from?: string | null;
+                ship_date_to?: string | null;
+                last_event_from?: string | null;
+                last_event_to?: string | null;
+                days_min?: number | null;
+                days_max?: number | null;
+                attention?: boolean | null;
+                geocoded?: boolean | null;
+                ids?: string[] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttentionRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_api_export_get: {
+        parameters: {
+            query?: {
+                format?: string;
+                columns?: string | null;
+                sort?: string | null;
+                status?: string[] | null;
+                carrier?: string[] | null;
+                upload_id?: string[] | null;
+                state?: string[] | null;
+                tag?: string[] | null;
+                city?: string | null;
+                q?: string | null;
+                ship_date_from?: string | null;
+                ship_date_to?: string | null;
+                last_event_from?: string | null;
+                last_event_to?: string | null;
+                days_min?: number | null;
+                days_max?: number | null;
+                attention?: boolean | null;
+                geocoded?: boolean | null;
+                ids?: string[] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_general_api_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeneralSettings"];
+                };
+            };
+        };
+    };
+    put_general_api_settings_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GeneralSettings"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeneralSettings"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_carriers_api_settings_carriers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CarrierSettingsOut"][];
+                };
+            };
+        };
+    };
+    put_carrier_api_settings_carriers__carrier__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                carrier: components["schemas"]["Carrier"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CarrierSettingsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CarrierSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_carrier_api_settings_carriers__carrier__test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                carrier: components["schemas"]["Carrier"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CredentialCheck"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_geocoder_api_settings_geocoder_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeocoderSettingsOut"];
+                };
+            };
+        };
+    };
+    put_geocoder_api_settings_geocoder_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GeocoderSettingsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeocoderSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_geocoder_api_settings_geocoder_test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CredentialCheck"];
+                };
+            };
+        };
+    };
+    summary_api_privacy_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacySummary"];
+                };
+            };
+        };
+    };
+    egress_api_privacy_egress_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EgressOut"][];
+                };
+            };
+        };
+    };
+    wipe_api_privacy_wipe_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WipeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

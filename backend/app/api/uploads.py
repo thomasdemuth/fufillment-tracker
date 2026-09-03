@@ -4,7 +4,7 @@ import hashlib
 from datetime import UTC, datetime
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -150,7 +150,7 @@ def preview_upload(
 
 
 @router.post("/{upload_id}/commit", response_model=CommitResult)
-def commit_upload(upload_id: int, body: CommitRequest, db: Session = Depends(get_db)):
+def commit_upload(upload_id: int, body: CommitRequest, bg: BackgroundTasks, db: Session = Depends(get_db)):
     u = db.get(Upload, upload_id)
     if not u or not u.raw_path:
         raise HTTPException(404, "Upload not found")
@@ -207,7 +207,19 @@ def commit_upload(upload_id: int, body: CommitRequest, db: Session = Depends(get
     geocode_shipments_offline(db, ids)
     db.commit()
 
+    geocode_job_id = None
+    if body.geocode_mode == "online" and ids:
+        from app.models import Job
+        from app.services.geocode_job import run_geocode_job
+
+        job = Job(kind="geocode", status="queued", total=len(ids), error_sample={"ids": ids, "errors": []})
+        db.add(job)
+        db.commit()
+        geocode_job_id = job.id
+        bg.add_task(run_geocode_job, job.id)
+
     return CommitResult(
+        geocode_job_id=geocode_job_id,
         upload=_upload_out(db, u),
         imported=summary.imported,
         duplicates=summary.duplicates,

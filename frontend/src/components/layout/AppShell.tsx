@@ -3,6 +3,7 @@ import { AlertTriangle, LayoutList, Map, Moon, Settings, ShieldCheck, Sun, Uploa
 import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/uiStore'
 import { Button } from '@/components/ui/button'
+import { CommandPalette } from '@/components/layout/CommandPalette'
 
 const nav = [
   { to: '/map', label: 'Map', icon: Map },
@@ -64,6 +65,7 @@ export function AppShell() {
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Outlet />
       </main>
+      <CommandPalette />
     </div>
   )
 }

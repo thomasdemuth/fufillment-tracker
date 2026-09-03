@@ -22,7 +22,14 @@ def test_mock_is_deterministic_and_progresses():
     c.now = datetime(2026, 8, 30, 12)
     r3 = _fetch(c, ["A"])["A"]
     assert len(r3.events) >= len(r1.events)
-    assert r3.status in (S.DELIVERED, S.EXCEPTION, S.RETURNED, S.LABEL_CREATED, S.IN_TRANSIT, S.OUT_FOR_DELIVERY)
+    assert r3.status in (
+        S.DELIVERED,
+        S.EXCEPTION,
+        S.RETURNED,
+        S.LABEL_CREATED,
+        S.IN_TRANSIT,
+        S.OUT_FOR_DELIVERY,
+    )
 
 
 def test_mock_scenarios_cover_statuses():
@@ -88,7 +95,10 @@ def test_refresh_filters_and_single(seeded):
 
 def test_patch_shipment_regeocodes(seeded):
     row = seeded.get("/api/shipments", params={"page_size": 1}).json()["items"][0]
-    d = seeded.patch(f"/api/shipments/{row['id']}", json={"city": "Beverly Hills", "state": "ca", "postal_code": "90210", "carrier": "fedex"}).json()
+    d = seeded.patch(
+        f"/api/shipments/{row['id']}",
+        json={"city": "Beverly Hills", "state": "ca", "postal_code": "90210", "carrier": "fedex"},
+    ).json()
     assert d["state"] == "CA" and d["carrier"] == "fedex" and d["carrier_locked"] is True
     assert abs(d["dest_lat"] - 34.09) < 0.1
     assert seeded.patch(f"/api/shipments/{row['id']}", json={"carrier": "dhl"}).status_code == 422

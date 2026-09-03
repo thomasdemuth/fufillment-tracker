@@ -57,7 +57,9 @@ def test_usps_client_end_to_end(app_env):
     route = respx.get(f"{base}/tracking/v3/tracking/9400111899223197428490").mock(
         return_value=httpx.Response(200, json=load("usps/track_delivered.json"))
     )
-    respx.get(f"{base}/tracking/v3/tracking/000").mock(return_value=httpx.Response(404, json={"error": {"message": "not found"}}))
+    respx.get(f"{base}/tracking/v3/tracking/000").mock(
+        return_value=httpx.Response(404, json={"error": {"message": "not found"}})
+    )
     respx.get(f"{base}/tracking/v3/tracking/429").mock(return_value=httpx.Response(429))
     c = USPSClient("id", "secret", sandbox=True)
     out = asyncio.run(c.fetch(["9400111899223197428490", "000", "429"]))
@@ -80,7 +82,9 @@ def test_usps_client_end_to_end(app_env):
 
 @respx.mock
 def test_usps_bad_credentials(app_env):
-    respx.post("https://apis.usps.com/oauth2/v3/token").mock(return_value=httpx.Response(401, json={"error": "invalid_client"}))
+    respx.post("https://apis.usps.com/oauth2/v3/token").mock(
+        return_value=httpx.Response(401, json={"error": "invalid_client"})
+    )
     c = USPSClient("id", "bad")
     st = asyncio.run(c.check_credentials())
     assert st.ok is False and "rejected" in st.message
@@ -93,7 +97,10 @@ def test_fedex_client_refreshes_token_on_401(app_env):
     base = "https://apis-sandbox.fedex.com"
     respx.post(f"{base}/oauth/token").mock(return_value=httpx.Response(200, json=load("fedex/token.json")))
     track = respx.post(f"{base}/track/v1/trackingnumbers").mock(
-        side_effect=[httpx.Response(401, json={"errors": [{"code": "NOT.AUTHORIZED.ERROR"}]}), httpx.Response(200, json=load("fedex/track_batch.json"))]
+        side_effect=[
+            httpx.Response(401, json={"errors": [{"code": "NOT.AUTHORIZED.ERROR"}]}),
+            httpx.Response(200, json=load("fedex/track_batch.json")),
+        ]
     )
     c = FedExClient("key", "secret", sandbox=True)
     out = asyncio.run(c.fetch(["123456789012", "123456789013", "123456789014"]))
@@ -101,7 +108,11 @@ def test_fedex_client_refreshes_token_on_401(app_env):
     assert out["123456789012"].status == S.DELIVERED
     body = json.loads(track.calls[1].request.content)
     assert body["includeDetailedScans"] is True
-    assert [t["trackingNumberInfo"]["trackingNumber"] for t in body["trackingInfo"]] == ["123456789012", "123456789013", "123456789014"]
+    assert [t["trackingNumberInfo"]["trackingNumber"] for t in body["trackingInfo"]] == [
+        "123456789012",
+        "123456789013",
+        "123456789014",
+    ]
 
 
 @respx.mock
